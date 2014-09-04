@@ -1,0 +1,10 @@
+"Gamemode"
+{
+	"title"		"Gmod Day-Z"
+	"name"		"Gmod Day-Z"
+	"version"	"1.0"
+
+	"author_name"	"Fudsine"
+	"menusystem"	"1"
+}
+ 
