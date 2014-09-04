@@ -9,15 +9,15 @@ ENT.Base = "base_nextbot"
 ENT.IsZombie = true
 --ENT.Skins = 22
 --ENT.AttackAnims = { "attack01", "attack02", "attack03", "attack04" }
-ENT.MaxDist = 600
+ENT.MaxDist = 800
 ENT.AnimSpeed = 1.2
 ENT.AttackTime = 0.5
 ENT.MeleeDistance = 64
 ENT.BreakableDistance = 64
-ENT.Damage = 10
+ENT.Damage = 15
 ENT.BaseHealth = 120
-ENT.JumpHeight = 160
-ENT.MoveSpeed = 460
+ENT.JumpHeight = 100
+ENT.MoveSpeed = 260
 ENT.BumpSpeed = 700
 ENT.MoveAnim = ACT_RUN
 ENT.WalkAnim = ACT_WALK
@@ -130,9 +130,9 @@ function ENT:Initialize()
 	self:SetTrigger( true )
 	
 	self.loco:SetDeathDropHeight( 1000 )
-	self.loco:SetStepHeight(35)	
-	self.loco:SetAcceleration( math.random(350, 650) )	
-	self.MoveSpeed = math.random(150, 400)
+	self.loco:SetStepHeight(20)	
+	self.loco:SetAcceleration(200) --math.random(350, 650)	
+	--self.MoveSpeed = 320--math.random(150, 400)
 	self.loco:SetJumpHeight( self.JumpHeight )
 	
 	self.DmgTable = {}
@@ -391,9 +391,9 @@ function ENT:OnHitBreakable( ent )
 					end
 							
 					ent:EmitSound( self.WoodBust )					
-					ent:SetPos( ent:GetPos() + ent:GetUp()*-400) --Move door underground/out of sights
+					ent:SetPos( ent:GetPos() + ent:GetUp()*-800) --Move door underground/out of sights
 					
-					timer.Simple( math.random(400, 600), function() ent:SetPos( ent:GetPos() + ent:GetUp()*400) ent.Hits = nil end) --Move door up again to 'respawn'
+					timer.Simple( math.random(400, 600), function() ent:SetPos( ent:GetPos() + ent:GetUp()*800) ent.Hits = nil end) --Move door up again to 'respawn'
 					timer.Simple( 10, function() prop:Remove() end)
 					
 							
@@ -462,7 +462,7 @@ function ENT:CanAttackEnemy( ent )
 		return ent
 	end
 
-	for k,v in pairs( ents.FindInBox(self:GetPos()+Vector(-128,-128,-128), self:GetPos()+Vector(128,128,128) ) ) do
+	for k,v in pairs( ents.FindInBox(self:GetPos()+Vector(-64,-64,-64), self:GetPos()+Vector(64,64,64) ) ) do
 		if v:IsPlayer() and self:CanAttack( v ) then
 			return v
 		end
@@ -478,17 +478,8 @@ function ENT:GetJumpable()
 	local tr = util.TraceLine( trace )
 	
 	if tr.Hit then
-	
-		if tr.Entity:IsVehicle() then
-			if tr.Entity:GetVelocity():Length() > 200 then
-				--print("Vehicle!")
-				local ragdoll = CreateCorpse(self)
-				table.RemoveByValue(ZombieTbl, self)
-				ragdoll:GetPhysicsObject():ApplyForceCenter(tr.Entity:GetVelocity() * 10000)
-			end
-		end
-		
 		if tr.Entity:IsPlayer() then return false end
+		if tr.Entity:IsVehicle() then return false end
 		if tr.Entity:IsNPC() then return false end
 		return true
 	end
@@ -547,8 +538,8 @@ function ENT:BreakableRoutine()
 	local ent = self:GetBreakable()			
 	while IsValid( ent ) do			
 		local anim = table.Random( self.AttackAnims )
-		
-		self:PlaySequenceAndWait( anim, self.AnimSpeed )		
+		self:StartActivity(ACT_MELEE_ATTACK1)
+		coroutine.wait(1)
 		self:StartAttack( ent )		
 		ent = self:GetBreakable()			
 	end
@@ -559,18 +550,11 @@ function ENT:EnemyRoutine()
 
 	local closest = self:CanAttackEnemy( enemy )
 			
-	while IsValid( closest ) do
-		if self.AttackAnims then
-			local anim = table.Random( self.AttackAnims )
-				
-			self:PlaySequenceAndWait( anim, self.AnimSpeed )
-			self:StartAttack( closest )
-		else
+	while IsValid( closest ) do		
 			self:StartActivity(ACT_MELEE_ATTACK1)
+			self:SetPoseParameter("move_x",0.8)
 			coroutine.wait(1)
-			self:StartAttack( closest )
-		end
-							
+			self:StartAttack( closest )			
 		closest = self:CanAttackEnemy( closest )
 				
 	end
@@ -595,21 +579,19 @@ function ENT:RunBehaviour()
 	
 		if self.Agroer then
 			self.loco:FaceTowards(self.Agroer:GetPos())
-			--self:PlaySequenceAndWait("ShoveReactBehind",0.2)
-			--self:SetSequence("Run", 0.7)
-			self:StartActivity( self.MoveAnim )
+			self:PlayActivity( self.MoveAnim )
 			self.loco:SetDesiredSpeed( self.MoveSpeed )
+			self.loco:SetAcceleration(120)
 			self:MoveToPos(self.Agroer:GetPos())
 			self.Agroer = nil
 		end
 		
 		if self.HeardSound == true then	
 			self.loco:FaceTowards(self.SoundPos)
-			--self:PlaySequenceAndWait("ShoveReactBehind",0.2)
-			--self:SetSequence("Run", 0.7)
-			self:StartActivity( self.MoveAnim )
+			self:PlayActivity( self.MoveAnim )
 			self:EmitVoiceSound( "cyb_zombies/alertroar.wav" )
 			self.loco:SetDesiredSpeed( self.MoveSpeed )
+			self.loco:SetAcceleration(120)
 			self:MoveToPos(self.SoundPos)
 			self.HeardSound = false
 			self.SoundPos = nil
@@ -617,14 +599,11 @@ function ENT:RunBehaviour()
 		
 		local enemy = self:FindEnemy()
 		
-		if IsValid(enemy) then
-						
-			--self:PlayActivity( self.MoveAnim )
+		if IsValid(enemy) then		
 			self.loco:FaceTowards(enemy:GetPos())
-			--self:PlaySequenceAndWait("ShoveReactBehind",0.2)
-			--self:SetSequence("Run", 0.7)
-			self:StartActivity( self.MoveAnim )
+			self:PlayActivity( self.MoveAnim )
 			self.loco:SetDesiredSpeed( self.MoveSpeed )
+			self.loco:SetAcceleration(120)
 			if !self.Alert then
 				self:StopMovingToPos()
 				self:EmitVoiceSound( "cyb_zombies/alertroar.wav" )
@@ -639,20 +618,15 @@ function ENT:RunBehaviour()
 			self:EnemyRoutine()
 			
 		else
-			self.Alert = false
-			--self:PlayActivity(self.WalkAnim)
-			self:StartActivity(ACT_IDLE)
-			--self:SetSequence(table.Random(self.WalkSequences),0.7)
-			
-			
+			self.Alert = false			
 			if math.random(1,100) > 90 then
 				self:PlayActivity(ACT_WALK)
-				self.loco:SetDesiredSpeed( math.floor(self.MoveSpeed/10) ) -- default: self.MoveSpeed/3
+				self.loco:SetDesiredSpeed( math.random(self.MoveSpeed/10, self.MoveSpeed/8) ) -- default: self.MoveSpeed/3
+				self.loco:SetAcceleration(5)
 				self:MoveToPos( self:GetPos() + Vector( math.Rand( -100, 100 ), math.Rand( -100, 100 ), 0 ) * 2 )
-			end
-			--self:SetSequence(table.Random(self.IdleSequences),0.7)
-			
-			--self.loco:SetDesiredSpeed( 0 )			
+			else
+				self:PlayActivity(ACT_IDLE)
+			end			
 		end		
 
         coroutine.yield()
