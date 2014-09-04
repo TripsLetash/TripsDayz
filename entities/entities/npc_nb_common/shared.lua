@@ -519,12 +519,15 @@ function ENT:OnStuck()
 	else
 		self.Obstructed = false
 	end
+	if !self.Alert then
+		self.loco:SetDesiredSpeed( self.BumpSpeed )
+		self.loco:Jump()
+		self.loco:SetDesiredSpeed( self.BumpSpeed )	
 	
-	self.loco:SetDesiredSpeed( self.BumpSpeed )
-	self.loco:Jump()
-	self.loco:SetDesiredSpeed( self.BumpSpeed )
-		
-	self:StopMovingToPos()		
+		self:StopMovingToPos()
+	else
+		self.loco:Jump()
+	end
 	self.loco:ClearStuck()
 
 end
@@ -537,7 +540,7 @@ function ENT:BreakableRoutine()
 
 	local ent = self:GetBreakable()			
 	while IsValid( ent ) do			
-		local anim = table.Random( self.AttackAnims )
+		--local anim = table.Random( self.AttackAnims )
 		self:StartActivity(ACT_MELEE_ATTACK1)
 		coroutine.wait(1)
 		self:StartAttack( ent )		
@@ -551,8 +554,8 @@ function ENT:EnemyRoutine()
 	local closest = self:CanAttackEnemy( enemy )
 			
 	while IsValid( closest ) do		
-			self:StartActivity(ACT_MELEE_ATTACK1)
-			self:SetPoseParameter("move_x",0.8)
+			self:StartActivity(ACT_MELEE_ATTACK1)			
+			self:SetPoseParameter("move_x",1.6)
 			coroutine.wait(1)
 			self:StartAttack( closest )			
 		closest = self:CanAttackEnemy( closest )
@@ -611,7 +614,7 @@ function ENT:RunBehaviour()
 			end
 					
 			local age = math.Clamp( math.min( enemy:GetPos():Distance( self:GetPos() ), 1000 ) / 1000, 0.2, 1 )
-			local opts = { draw = self.ShouldDrawPath, maxage = 2 * age, repath = 1, timeout = .5, tolerance = self.MeleeDistance/2 }--/2
+			local opts = { draw = self.ShouldDrawPath, maxage = 2 * age, repath = 1, timeout = .5, tolerance = self.MeleeDistance/4 }--/2
 			
 			self:MoveToPos( enemy:GetPos(), opts ) 
 			self:BreakableRoutine()
