@@ -539,14 +539,13 @@ end
 function ENT:BreakableRoutine()
 
 	local ent = self:GetBreakable()			
-	while IsValid( ent ) do			
-		--local anim = table.Random( self.AttackAnims )
+	while IsValid( ent ) do
 		self:StartActivity(ACT_MELEE_ATTACK1)
+		self:SetPoseParameter("move_x",1.6)
 		coroutine.wait(1)
 		self:StartAttack( ent )		
 		ent = self:GetBreakable()			
 	end
-
 end
 
 function ENT:EnemyRoutine()
@@ -554,14 +553,12 @@ function ENT:EnemyRoutine()
 	local closest = self:CanAttackEnemy( enemy )
 			
 	while IsValid( closest ) do		
-			self:StartActivity(ACT_MELEE_ATTACK1)			
-			self:SetPoseParameter("move_x",1.6)
-			coroutine.wait(1)
-			self:StartAttack( closest )			
+		self:StartActivity(ACT_MELEE_ATTACK1)			
+		self:SetPoseParameter("move_x",1.6)
+		coroutine.wait(1)
+		self:StartAttack( closest )			
 		closest = self:CanAttackEnemy( closest )
-				
 	end
-
 end
 function ENT:ListenToSounds( pos, heard)	
 	self.SoundPos = pos
