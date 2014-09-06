@@ -1,4 +1,10 @@
 TripsDayz
 =========
 
-G-Mod DayZ gamemode (based on Cybergmod DayZ)
+
+G-Mod Zombie survival gamemode
+
+
+
+
+(based on Cybergmod DayZ)
