@@ -724,7 +724,7 @@ function SWEP:PrimaryAttack()
 		else
 			self:EmitSound(self.FireSound, 105, 100)
 			local firepos = self:GetPos()
-			local _ents = ents.FindInBox( self:GetPos()+ Vector(-((self.Bulletdiameter * self.CaseLength)*7), -((self.Bulletdiameter * self.CaseLength)*7), -100), self:GetPos()+Vector(((self.Bulletdiameter * self.CaseLength)*7), ((self.Bulletdiameter * self.CaseLength)*7), 100) )
+			local _ents = ents.FindInBox( self:GetPos()+ Vector(-((self.BulletDiameter * self.CaseLength)*7), -((self.BulletDiameter * self.CaseLength)*7), -100), self:GetPos()+Vector(((self.BulletDiameter * self.CaseLength)*7), ((self.BulletDiameter * self.CaseLength)*7), 100) )
 			for k,v in pairs( _ents ) do
 				if v:GetClass() == "npc_nb_common" then	
 					if SERVER then
