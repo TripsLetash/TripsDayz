@@ -3,7 +3,7 @@ util.AddNetworkString( "Hunger" )
 
 Spawns = {}
 
-Spawns[ "rp_necro_forest_a1_trips" ] = {
+Spawns[ "dz_tripstown_necro_forest" ] = {
 	Vector(2587,-2172,10),
 	Vector(5707,775,9),
 	Vector(4998,584,15),

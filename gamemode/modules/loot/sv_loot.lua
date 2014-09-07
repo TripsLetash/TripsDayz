@@ -11,7 +11,7 @@ local TotalAllowedLoot = 200
 TotalSpawnedLoot = TotalSpawnedLoot or 0
 
 local LootVectors = {
-	[ "rp_necro_forest_a1_trips" ] = {
+	[ "dz_tripstown_necro_forest" ] = {
 		[ TYPE_BASIC ] = {
 			Vector(930,1564,96),
 			Vector(1044,1762,100),

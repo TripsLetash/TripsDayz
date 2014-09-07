@@ -1,13 +1,13 @@
 CarSpawns = {}
 HeliSpawns = {}
 
-CarSpawns["rp_necro_forest_a1_trips"] = {
+CarSpawns["dz_tripstown_necro_forest"] = {
 	--Vector(4657,1725,0)
 	/*Vector(8569,12308,0),
 	Vector(12200,-7890,-4),*/
 }
 
-HeliSpawns["rp_necro_forest_a1_trips"] = {
+HeliSpawns["dz_tripstown_necro_forest"] = {
 	Vector(-627,215,272)
 }
 
