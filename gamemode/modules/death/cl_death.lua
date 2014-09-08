@@ -1,4 +1,4 @@
-local function ZombiePModel()
+/*local function ZombiePModel()
 	local zombie = net.ReadEntity()
 	local zmodel = net.ReadString()
 	
@@ -17,4 +17,4 @@ local function RZombiePModel()
 		zombie.mdl:Remove()
 	end
 end
-net.Receive("RZombiePModel", RZombiePModel)
+net.Receive("RZombiePModel", RZombiePModel)*/
