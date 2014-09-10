@@ -464,7 +464,9 @@ function GUI_Select_Model()
 				RunConsoleCommand("UpdateCharModel", Outfit, Head, Gender)
 				RunConsoleCommand("ConfirmCharacter")
 			end
-			GUI_Model_Frame:Remove()
+			timer.Simple(1,function()
+				GUI_Model_Frame:Remove()
+			end)
 		end
 end
 
@@ -476,14 +478,29 @@ function GUI_ReadyToPlay()
 	ConfirmWindow:Center()
 	ConfirmWindow:SetDraggable(false)
 	ConfirmWindow.Paint = function()
-			draw.RoundedBox(0,0,0,ConfirmWindow:GetWide(),ConfirmWindow:GetTall(),Color( 0, 0, 0, 255 ))
-			draw.DrawText("Do you wish to continue where you left off?", "ScoreboardHeader", ScrW()/2, ScrH() / 2 - 25, Color(255, 255, 255, 255),TEXT_ALIGN_CENTER)
+			draw.RoundedBox(0,0,0,ConfirmWindow:GetWide(),ConfirmWindow:GetTall(),Color( 0, 0, 0, 10 ))
+			draw.DrawText("Are you ready to brave the hordes?", "ScoreboardHeader", ScrW()/2, ScrH() / 2 - 25, Color(255, 255, 255, 255),TEXT_ALIGN_CENTER)
 		end
+	local DcButton = vgui.Create("DButton")
+	DcButton:SetParent(ConfirmWindow)
+	DcButton:SetSize( btnMarginLeft*2, 50 )
+	DcButton:SetPos( ScrW()/2-btnMarginLeft, ScrH()/2+125 )
+	DcButton:SetText("No, take me away!")
+	DcButton:SetTextColor( Color(255,255,255,255) )
+	DcButton.Paint = function(self)
+			surface.SetDrawColor(cyb_mouseover)
+			surface.DrawRect( 0, 0, self:GetWide(), self:GetTall())
+	end
+	DcButton.DoClick = function()
+			RunConsoleCommand("disconnect")
+			ConfirmWindow:Remove()
+	end
+	
 	local ConfirmButton = vgui.Create( "DButton")
-	ConfirmButton:SetParent(ConfirmWindow)	
+	ConfirmButton:SetParent(ConfirmWindow)
 	ConfirmButton:SetSize( btnMarginLeft*2, 50 )
 	ConfirmButton:SetPos( ScrW()/2-btnMarginLeft, ScrH()/2+25 )
-	ConfirmButton:SetText( "Yes" )
+	ConfirmButton:SetText( "Yes, I'm ready to split some skulls." )
 	ConfirmButton:SetTextColor( Color(255,255,255,255) )
 	ConfirmButton.Paint = function(self)
 			surface.SetDrawColor(cyb_mouseover)
@@ -491,8 +508,10 @@ function GUI_ReadyToPlay()
 		end
 
 	ConfirmButton.DoClick = function()
-			RunConsoleCommand("ConfirmCharacter")
-			ConfirmWindow:Remove()
+			RunConsoleCommand("ReadyCharacter")
+			timer.Simple(1,function()
+				ConfirmWindow:Remove() 
+			end)
 		end
 
 	ConfirmWindow:MakePopup()

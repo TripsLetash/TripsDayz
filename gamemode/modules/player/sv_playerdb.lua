@@ -1,4 +1,5 @@
 util.AddNetworkString( "CharSelect" )
+util.AddNetworkString( "CharReady" )
 util.AddNetworkString( "ShopTable" )
 
 function PMETA:UpdatePerks( ignoresql )
@@ -114,13 +115,13 @@ function PHDayZ_SetupDatabase()
 end
 
 local function get_stats( ply )
-	local mapindex = 0
-	for k, v in pairs( MapIndex ) do
-		if v == string.lower( game.GetMap() ) then
-			mapindex = tonumber( k )
-			break
-		end
-	end
+	local mapindex = 5
+	--for k, v in pairs( MapIndex ) do
+	--	if v == string.lower( game.GetMap() ) then
+	--		mapindex = tonumber( k )
+	--		break
+	--	end
+	--end
 
 	local alive = 1
 	if ply.Dead == true then
@@ -186,7 +187,7 @@ function player_defaults( ply, reset )
 	ply.Thirst = 100
 	ply.Hunger = 100
 	
-	ply:SetPos( Vector( 13835, 6190, 43 ) )
+	ply:SetPos( Vector(0,0,-1000) )
 	ply:SetModel( "models/player/group01/male_01.mdl" )
 
 	if reset then
@@ -333,6 +334,7 @@ local function load_player( ply )
 
 			ply:UpdatePerks()
 			ply:CheckUnlocksSilent()
+			--ply.Loading = nil
 		end
 	end })
 end
@@ -356,13 +358,21 @@ local function spawn_defaults( ply )
 
 	if ply.Perk6 == true then
 		ply:GiveItem( "item_flashlight", 1 )
-	end
+	end	
 end
 
 local function confirm_player( ply, cmd, args )
+	ply:SetNWInt( "TagTime", 0 )	
+	ply:SetTeam( 1 )
+	ply.ConnectScreen = nil
+	ply:Freeze(false)
+	ply:SetKeyValue( "rendermode", RENDERMODE_NORMAL )
+	ply:SetKeyValue( "renderamt", "255" )
+	ply:SetCollisionGroup(COLLISION_GROUP_NONE)
+	ply:DrawShadow(true)
 	if ply.Loading == true then
-		ply.SpawnPos = table.Random( Spawns[ string.lower( game.GetMap() ) ] ) + Vector( 0, 0, 30 )
-		ply:SetPos( ply.SpawnPos )
+		ply.SpawnPos = table.Random( Spawns[ string.lower( game.GetMap() ) ] ) + Vector( 0, 0, 30 )		
+		ply:SetPos( ply.SpawnPos )		
 
 		if ply.New == true then
 			new_player( ply, function()	
@@ -373,9 +383,17 @@ local function confirm_player( ply, cmd, args )
 				spawn_defaults( ply )
 			end )
 		end
-	end
+	end	
 end
 concommand.Add( "ConfirmCharacter", confirm_player )
+
+local function ready_player( ply, cmd, args )
+	ply:SetNWInt( "TagTime", 0 )	
+	ply:SetTeam( 1 )
+	ply.ConnectScreen = nil
+	load_player( ply )
+end
+concommand.Add( "ReadyCharacter", ready_player )
 
 function reset_ent( ply )
 	ply:StripWeapons()	
@@ -402,7 +420,8 @@ function reset_ent( ply )
 
 	player_defaults( ply, true )
 
-	ply.SpawnPos = table.Random( Spawns[ string.lower( game.GetMap() ) ] ) + Vector( 0, 0, 30 )
+	--ply.SpawnPos = table.Random( Spawns[ string.lower( game.GetMap() ) ] ) + Vector( 0, 0, 30 )
+	ply.SpawnPos = table.Random( Spawns["PlayerSpawns"] ) + Vector( 0, 0, 30 )
 
 	save_player( ply, function()
 		spawn_defaults( ply )
@@ -439,16 +458,25 @@ function reset_steamid( steamid )
 end
 
 function GM:PlayerInitialSpawn( ply )
-	ply:SetNWInt( "TagTime", 0 )
-	
-	ply:SetTeam( 1 )
-	
+	ply:Spectate( OBS_MODE_ROAMING )
+	ply.ConnectScreen = true
 	net.Start( "ShopTable" )
 		net.WriteTable( GAMEMODE.DayZ_Shops[ "shop_buy" ] )
 	net.Send( ply )
 end
 
 function GM:PlayerSpawn( ply )
+	if ply.ConnectScreen == true then
+		ply:Spectate( OBS_MODE_ROAMING )
+		ply:Freeze(true) 
+		ply:SetPos( Vector(0,0,-1000) )		
+	else
+		ply:SetKeyValue( "rendermode", RENDERMODE_NORMAL )
+		ply:SetKeyValue( "renderamt", "255" )
+		ply:SetCollisionGroup(COLLISION_GROUP_NONE)
+		ply:DrawShadow(true)
+		ply:Freeze(false)
+	end
 	ply:SetRunSpeed( 250 )
 	ply:SetWalkSpeed( 200 )
 	ply:SetJumpPower( 250 )
@@ -508,10 +536,17 @@ function GM:PlayerSetHandsModel( ply, ent )
 end
 
 function GM:PlayerAuthed( ply )
-	load_player( ply )
-	ply:Spectate( OBS_MODE_FIXED )
-	
-	ply:SetNWInt( "TagTime", 0 )
+	--load_player( ply )
+	ply:Spectate( OBS_MODE_ROAMING )
+	ply:SetKeyValue("rendermode", RENDERMODE_TRANSTEXTURE)
+	ply:SetKeyValue("renderamt", "0")
+	ply:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
+	ply:DrawShadow(false)
+	ply:Freeze(true)
+	ply:SetNWInt( "TagTime", 0 )	
+	ply.ConnectScreen = true
+	net.Start("CharReady")
+	net.Send(ply)
 end
 
 local function SaveStats( ply )

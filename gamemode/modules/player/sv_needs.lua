@@ -1,12 +1,14 @@
 local function NeedsSetup(ply)
 	if !IsValid(ply) then return end
-
+	if ply.ConnectScreen then return end
 	timer.Create(ply:UserID().."_hunger", 14, 0, function()
 		if IsValid(ply) then
 			if ply.Loading then return end
+			if ply.ConnectScreen then return end
 
 			if ply.Hunger > 0 then
 				ply.Hunger = ply.Hunger - 1
+				--print("lol, lost hunger "..ply:Nick())
 			end
 			if ply:Alive() and ply.Hunger < 1 then
 				local ohealth = ply:Health()
@@ -26,9 +28,11 @@ local function NeedsSetup(ply)
 	timer.Create(ply:UserID().."_thirst", 12, 0, function()
 		if IsValid(ply) then
 			if ply.Loading then return end
+			if ply.ConnectScreen then return end
 	
 			if ply.Thirst > 0 then
 				ply.Thirst = ply.Thirst - 1
+				--print("lol, lost thirst "..ply:Nick())
 			end
 			if ply:Alive() and ply.Thirst < 1 then
 				local ohealth = ply:Health()

@@ -393,7 +393,7 @@ local function PaintMap()
 	end
 	
 	if (not LocalPlayer():Alive()) then return end
-	
+	if LocalPlayer().ConnectScreen == true then return end
 	if (ShouldDrawMap) then
 		DrawMap()
 	elseif (CyBMapEnabled == 1) then

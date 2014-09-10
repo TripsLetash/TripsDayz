@@ -314,6 +314,7 @@ local function HUDPaint( )
 
 		
 	if LocalPlayer():Alive() then
+		if LocalPlayer().ConnectScreen == true then return end
 		drawleftbg()
 		drawxp()
 		DrawHealth()
