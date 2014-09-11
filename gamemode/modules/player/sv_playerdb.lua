@@ -67,6 +67,7 @@ function PHDayZ_SetupDatabase()
 			`kills` smallint(3) unsigned NOT NULL,
 			`credits` int(10) unsigned NOT NULL,
 			`extraslots` tinyint(3) unsigned NOT NULL,
+			`bleeding` smallint(4) unsigned NOT NULL,
 			PRIMARY KEY (`id`),
 			KEY `steamid` (`steamid`)
 		)
@@ -148,7 +149,8 @@ local function get_stats( ply )
 		ply:GetNWInt( "lvl" ),
 		ply:Frags(),
 		ply:GetNWInt( "credits" ),
-		ply:GetNWInt( "extraslots" )
+		ply:GetNWInt( "extraslots" ),
+		ply.Bleed
 	}
 end
 
@@ -156,7 +158,7 @@ function save_player( ply, func )
 	if ply.New or !ply.ID then return false end
 
 	local stats = get_stats( ply )
-	PLib:RunPreparedQuery({ sql = "UPDATE `players` SET `gender` = " .. stats[ 1 ] .. ", `face` = " .. stats[ 2 ] .. ", `hat` = " .. stats[ 3 ] .. ", `clothes` = " .. stats[ 4 ] .. ", `health` = " .. stats[ 5 ] .. ", `thirst` = " .. stats[ 6 ] .. ", `hunger` = " .. stats[ 7 ] .. ", `alive` = " .. stats[ 8 ] .. ", `xpos` = " .. stats[ 9 ].x .. ", `ypos` = " .. stats[ 9 ].y .. ", `zpos` = " .. stats[ 9 ].z .. ", `mapindex` = " .. stats[ 10 ] .. ", `xp` = " .. stats[ 11 ] .. ", `lvl` = " .. stats[ 12 ] .. ", `kills` = " .. stats[ 13 ] .. ", `credits` = " .. stats[ 14 ] .. ", `extraslots` = " .. stats[ 15 ] .. " WHERE `id` = " .. ply.ID .. ";", 
+	PLib:RunPreparedQuery({ sql = "UPDATE `players` SET `gender` = " .. stats[ 1 ] .. ", `face` = " .. stats[ 2 ] .. ", `hat` = " .. stats[ 3 ] .. ", `clothes` = " .. stats[ 4 ] .. ", `health` = " .. stats[ 5 ] .. ", `thirst` = " .. stats[ 6 ] .. ", `hunger` = " .. stats[ 7 ] .. ", `alive` = " .. stats[ 8 ] .. ", `xpos` = " .. stats[ 9 ].x .. ", `ypos` = " .. stats[ 9 ].y .. ", `zpos` = " .. stats[ 9 ].z .. ", `mapindex` = " .. stats[ 10 ] .. ", `xp` = " .. stats[ 11 ] .. ", `lvl` = " .. stats[ 12 ] .. ", `kills` = " .. stats[ 13 ] .. ", `credits` = " .. stats[ 14 ] .. ", `extraslots` = " .. stats[ 15 ] .. ", `bleeding` = " .. stats[ 16 ] .. " WHERE `id` = " .. ply.ID .. ";", 
 	callback = function( data )
 		if isfunction( func ) then
 			func()
@@ -174,7 +176,7 @@ end
 
 local function new_player( ply, func )
 	local stats = get_stats( ply )
-	PLib:RunPreparedQuery({ sql = "INSERT INTO `players` ( `steamid`, `gender`, `face`, `hat`, `clothes`, `health`, `thirst`, `hunger`, `alive`, `xpos`, `ypos`, `zpos`, `mapindex`, `xp`, `lvl`, `kills`, `credits`, `extraslots` ) VALUES ( '" .. ply:SteamID() .. "', " .. stats[ 1 ] .. ", " .. stats[ 2 ] .. ", " .. stats[ 3 ] .. ", " .. stats[ 4 ] .. ", " .. stats[ 5 ] .. ", " .. stats[ 6 ] .. ", " .. stats[ 7 ] .. ", " .. stats[ 8 ] .. ", " .. stats[ 9 ].x .. ", " .. stats[ 9 ].y .. ", " .. stats[ 9 ].z .. ", " .. stats[ 10 ] .. ", " .. stats[ 11 ] .. ", " .. stats[ 12 ] .. ", " .. stats[ 13 ] .. ", " .. stats[ 14 ] .. ", " .. stats[ 15 ] .. " );", 
+	PLib:RunPreparedQuery({ sql = "INSERT INTO `players` ( `steamid`, `gender`, `face`, `hat`, `clothes`, `health`, `thirst`, `hunger`, `alive`, `xpos`, `ypos`, `zpos`, `mapindex`, `xp`, `lvl`, `kills`, `credits`, `extraslots`, `bleeding` ) VALUES ( '" .. ply:SteamID() .. "', " .. stats[ 1 ] .. ", " .. stats[ 2 ] .. ", " .. stats[ 3 ] .. ", " .. stats[ 4 ] .. ", " .. stats[ 5 ] .. ", " .. stats[ 6 ] .. ", " .. stats[ 7 ] .. ", " .. stats[ 8 ] .. ", " .. stats[ 9 ].x .. ", " .. stats[ 9 ].y .. ", " .. stats[ 9 ].z .. ", " .. stats[ 10 ] .. ", " .. stats[ 11 ] .. ", " .. stats[ 12 ] .. ", " .. stats[ 13 ] .. ", " .. stats[ 14 ] .. ", " .. stats[ 15 ] .. ", " .. stats[ 16 ] .. " );", 
 	callback = function( data )
 		ply.ID = data
 		ply.New = nil
@@ -191,6 +193,7 @@ function player_defaults( ply, reset )
 	ply:SetHealth( 100 )
 	ply.Thirst = 100
 	ply.Hunger = 100
+	ply.Bleed = 0
 	
 	ply:SetPos( Vector(0,0,-1000) )
 	ply:SetModel( "models/player/group01/male_01.mdl" )
@@ -270,6 +273,7 @@ local function load_player( ply )
 				ply:SetHealth( data[ 8 ] )
 				ply.Thirst = tonumber( data[ 9 ] )
 				ply.Hunger = tonumber( data[ 10 ] )
+				ply.Bleed = tonumber( data [ 20 ] )
 
 				ply:SetNWInt( "xp", tonumber( data[ 15 ] ) )
 				ply:SetFrags( tonumber( data[ 17 ] ) )
@@ -286,6 +290,10 @@ local function load_player( ply )
 				end)
 				net.Start( "Thirst" )
 					net.WriteUInt( ply.Thirst, 8 )		
+				net.Send( ply )
+
+				net.Start( "Bleed" )
+					net.WriteUInt( ply.Bleed, 8 )		
 				net.Send( ply )
 				
 				net.Start( "Hunger" )
@@ -530,6 +538,10 @@ function GM:PlayerSpawn( ply )
 
 	net.Start( "Thirst" )
 		net.WriteUInt( ply.Thirst or 100, 8 )		
+	net.Send( ply )
+
+	net.Start( "Bleed" )
+		net.WriteUInt( ply.Bleed or 0, 8 )		
 	net.Send( ply )
 	
 	net.Start( "Hunger" )

@@ -351,6 +351,11 @@ function ENT:StartAttack( enemy )
 end
 
 function ENT:OnHitEnemy( enemy )
+	if enemy:IsPlayer() then
+		if math.random(1,100) > 20 then
+			enemy:Bleeding( 1 )
+		end
+	end
 	enemy:TakeDamage( self.Damage, self )
 end
 

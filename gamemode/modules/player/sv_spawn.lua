@@ -1,4 +1,5 @@
 util.AddNetworkString( "Thirst" )
+util.AddNetworkString( "Bleed" )
 util.AddNetworkString( "Hunger" )
 
 Spawns = {}

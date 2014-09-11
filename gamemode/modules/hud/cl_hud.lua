@@ -32,13 +32,20 @@ net.Receive( "net_DeathMessage", function( len )
 end)
 
 local LastHungerReceived = LastHungerReceived or 100
+local LastBleedReceived = LastBleedReceived or 0
 local LastThirstReceived = LastThirstReceived or 100
 local LastHungerReceivedTime = LastHungerReceivedTime or CurTime()
+local LastBleedReceivedTime = LastBleedReceivedTime or CurTime()
 local LastThirstReceivedTime = LastThirstReceivedTime or CurTime()
 
 net.Receive("Hunger", function(len)
 	LastHungerReceived = net.ReadUInt(8)
 	LastHungerReceivedTime = CurTime()
+end)
+
+net.Receive("Bleed", function(len)
+	LastBleedReceived = net.ReadUInt(8)
+	LastBleedReceivedTime = CurTime()
 end)
 
 net.Receive("Thirst", function(len)
@@ -48,6 +55,10 @@ end)
 
 local function GetHungerValue()
 	return math.Round( LastHungerReceived - ( ( CurTime() - LastHungerReceivedTime ) / 14 ) )
+end
+
+local function GetBleedValue()
+	return LastBleedReceived
 end
 
 local function GetThirstValue()
@@ -320,6 +331,7 @@ local function HUDPaint( )
 		DrawHealth()
 		DrawHunger()		
 		DrawThirst()
+		DrawBleeding()
 		DrawStamina()		
 		makelogo()
 		drawvehiclehud()
@@ -874,4 +886,30 @@ function DrawThirst()
 			
 	surface.SetMaterial( thirstmat )
 	surface.DrawTexturedRect(200, ScrH() -162, 64,64)
+end
+
+function DrawBleeding() 
+	local bleedmat = Material("filmgrain/trips_bleed.png")
+	if GetBleedValue() == nil then return end	
+	if GetBleedValue() == 0 then return end
+
+	if GetBleedValue() > 0 then
+		if CountUp == nil then CountUp = false end
+		if bleedPulse == nil then bleedPulse = 0 end
+		surface.SetDrawColor(255,0,0,bleedPulse)
+		if CountUp == true then
+			--print("Blood count up!: "..bleedPulse.."\n")
+			bleedPulse = bleedPulse + 10
+			if bleedPulse >= 250 then CountUp = false end
+		elseif CountUp == false then
+			--print("Blood count down!: "..bleedPulse.."\n")
+			bleedPulse = bleedPulse - 10
+			if bleedPulse <= 0 then CountUp = true end
+		end
+		
+		
+	end
+			
+	surface.SetMaterial( bleedmat )
+	surface.DrawTexturedRect(255, ScrH() -162, 64,64)
 end

@@ -547,15 +547,15 @@ GM.DayZ_Items = {
 		Angle = Angle(0,0,2),
 		Desc = "Army issue medicinal gauzes.",
 		Model = "models/w_models/weapons/w_eq_medkit.mdl",
-		Weight = 1,
+		Weight = 2,
 		LootType = { "Medical" },
-		Price = 100,
-		Credits = 10,	
-		SpawnChance = 15, -- Out of 100
+		Price = 50,
+		Credits = 5,	
+		SpawnChance = 60, -- Out of 100
 		SpawnOffset = Vector(0,0,0),
 		Craftable = true,
-		ReqCraft = { Slot1 = "item_fabric", Slot2="item_aloecream", Slot3="item_fabric" },
-		Function = function(ply, item) ply:Heal(55) end,		
+		ReqCraft = { Slot1 = "item_fabric", Slot2="item_fabric" },
+		Function = function(ply, item) ply:Bleeding(0) end,		
 	},
 
 	{

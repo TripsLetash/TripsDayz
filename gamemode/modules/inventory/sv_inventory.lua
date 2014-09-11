@@ -484,6 +484,26 @@ function PMETA:Drink( amount )
 	net.Send( self )
 end
 
+function PMETA:Bleeding( bleed )
+	if bleed == nil then return false end
+	
+	if self.Bleed == 1 and bleed == 1 then
+		self.Bleed = 1
+	elseif self.Bleed == 1 and bleed == 0 then
+		self.Bleed = 0 
+		self:EmitSound( "drink.wav", 50, 100 )  	-- TO DO
+	elseif self.Bleed == 0 and bleed == 1 then
+		self.Bleed = 1 
+		self:EmitSound( "drink.wav", 50, 100 )  	-- TO DO	
+	elseif self.Bleed == 0 and bleed == 0 then
+		self.Bleed = 0
+	end
+	
+	net.Start( "Bleed" )
+		net.WriteUInt( self.Bleed, 8 )
+	net.Send( self )
+end
+
 function PMETA:Eat( amount )
 	if amount == nil then return false end
 	if amount < 0 then return false end

@@ -48,6 +48,32 @@ local function NeedsSetup(ply)
 			end
 		end	
 	end)
+	
+	timer.Create(ply:UserID().."_bleeding", 3, 0, function()
+		if IsValid(ply) then
+			if ply.Loading then return end
+			if ply.ConnectScreen then return end	
+			
+			if ply:Alive() and ply.Bleed > 0 then
+				local ohealth = ply:Health()
+				ply:TakeDamage(2, ply)
+				if ply:Health() == ohealth then	
+					ply:SetHealth(ply:Health() - 2)
+					if ply:Health() <= 0 then
+						ply.DiedOf = "You bled out."
+						ply:Kill()
+					end
+				end
+				if bleedcounter == nil then bleedcounter = 0 end
+				bleedcounter = bleedcounter + 1
+				if bleedcounter >= 5 then
+					ply:Tip( 1, "You are bleeding!", Color(255, 0, 0))
+					bleedcounter = 0
+				end
+			end
+		end	
+	end)
+	
 		
 end
 hook.Add( "PlayerInitialSpawn", "Lower_HungerWater", NeedsSetup )
@@ -56,5 +82,6 @@ gameevent.Listen("player_disconnect")
 local function RemoveNeedTimers(data)
 	timer.Destroy(data.userid.."_hunger")
 	timer.Destroy(data.userid.."_thirst")
+	timer.Destroy(data.userid.."_bleeding")
 end
 hook.Add( "player_disconnect", "Remove_HungerThirst_Timers", RemoveNeedTimers )
