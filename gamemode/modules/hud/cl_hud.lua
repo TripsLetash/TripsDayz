@@ -618,8 +618,23 @@ function makelogo()
 
 end
 
-function DrawHealth()
+function NoirMode()
+	local ply = LocalPlayer()	
+		local tab = {}
+		tab["$pp_colour_addr"] = 0
+		tab["$pp_colour_addg" ] = 0
+		tab["$pp_colour_addb" ] = 0
+		tab["$pp_colour_brightness" ] = 0
+		tab["$pp_colour_contrast" ] = 1
+		tab["$pp_colour_colour" ] = (LocalPlayer():Health() / 100) or 0
+		tab["$pp_colour_mulr" ] = 0.05
+		tab["$pp_colour_mulg" ] = 0.05
+		tab["$pp_colour_mulb" ] = 0.05
+		DrawColorModify( tab )	
+end
+hook.Add("RenderScreenspaceEffects", "NoirFunc", NoirMode)
 
+function DrawHealth()	
 	local maxlen = ( LocalPlayer():Health() / 100 ) * 250
 	
 	draw.RoundedBoxEx(4, 145, ScrH() -73, 252, 27, Color(255,255,255,255), true, true, true, true)
@@ -637,6 +652,9 @@ function DrawHealth()
 	draw.DrawText("Health", "Cyb_HudTEXT", 150, ScrH() -72, Color(255, 255, 255, 255),TEXT_ALIGN_LEFT)
 	draw.DrawText(LocalPlayer():Health(), "Cyb_HudTEXT", 390, ScrH() -72, Color(255, 255, 255, 255),TEXT_ALIGN_RIGHT)
 
+	surface.SetMaterial(Material("filmgrain/filmgrain"))
+	surface.SetDrawColor(0, 0, 0, (120 - LocalPlayer():Health()) )
+	surface.DrawTexturedRectUV(0, 0, ScrW(), ScrH(), 2, 2, 0, 0)
 end
 
 function DrawStamina()
