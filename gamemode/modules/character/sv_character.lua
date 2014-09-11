@@ -10,9 +10,13 @@ function PMETA:UpdateCharModel( face, clothes, gender )
 	end
 	
 	if tonumber( gender ) == 0 then
-		self:SetModel( MaleModels[ tonumber( face ) ][ tonumber( clothes ) ] )
+		local malemodel = MaleModels[ tonumber( face ) ][ tonumber( clothes ) ]
+		if !IsValid(malemodel) then malemodel = MaleModels[1][1] end
+		self:SetModel( malemodel )
 	else
-		self:SetModel( FemaleModels[ tonumber( face ) ][ tonumber( clothes ) ] )
+		local femalemodel = FemaleModels[ tonumber( face ) ][ tonumber( clothes ) ]
+		if !IsValid(femalemodel) then femalemodel = FemaleModels[1][1] end
+		self:SetModel( femalemodel )
 	end
 
 	self:GodDisable() -- character created disable godmode
