@@ -4,12 +4,6 @@ util.AddNetworkString( "ShopTable" )
 local function SetUpBackgrounds(ply)
 	AddOriginToPVS( Vector(0, 0, 100) )
 	AddOriginToPVS( Vector(5321,-5927,70) )
-	AddOriginToPVS( Vector(5386,-6329,0) )
-	AddOriginToPVS( Vector(5683,-6282,0) )
-	AddOriginToPVS( Vector(5264,-6048,54) )
-	AddOriginToPVS( Vector(666,220,32) )
-	AddOriginToPVS( Vector(1148,333,32))
-	AddOriginToPVS( Vector(772,-163,32) )
 end
 hook.Add("SetupPlayerVisibility", "SetUpBackgrounds", SetUpBackgrounds)
 
@@ -286,8 +280,10 @@ local function load_player( ply )
 				
 				ply:SetNWInt( "credits", tonumber( data[ 18 ] ) )
 				ply:Give( "weapon_EmptyHands" )
-				ply:UpdateCharModel( face, clothes, gender )
-				
+				--ply:UpdateCharModel( face, clothes, gender )
+				timer.Simple(1, function()
+					ply:UpdateCharModel(tonumber( data[ 4 ] ),tonumber( data[ 6 ] ),tonumber( data[ 3 ] ))
+				end)
 				net.Start( "Thirst" )
 					net.WriteUInt( ply.Thirst, 8 )		
 				net.Send( ply )
@@ -526,7 +522,8 @@ function GM:PlayerSpawn( ply )
 
 		ply.Loading = nil
 	end
-		
+
+	if ply.ConnectScreen then return end		
 	ply:CheckUnlocksSilent()
 	ply:SetupHands()
 	ply:SetFrags( 0 )

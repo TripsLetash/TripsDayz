@@ -10,8 +10,10 @@ function PMETA:UpdateCharModel( face, clothes, gender )
 	end
 	
 	if tonumber( gender ) == 0 then
+		print("face: "..face.." Clothes: "..clothes.." Gender: "..gender.."/n")
 		self:SetModel( MaleModels[ tonumber( face ) ][ tonumber( clothes ) ] )
 	else
+		print("face: "..face.." Clothes: "..clothes.." Gender: "..gender.."/n")
 		self:SetModel( FemaleModels[ tonumber( face ) ][ tonumber( clothes ) ] )
 	end
 
