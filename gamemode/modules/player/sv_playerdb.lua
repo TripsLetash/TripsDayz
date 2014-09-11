@@ -1,5 +1,4 @@
 util.AddNetworkString( "CharSelect" )
-util.AddNetworkString( "CharReady" )
 util.AddNetworkString( "ShopTable" )
 
 function PMETA:UpdatePerks( ignoresql )
@@ -460,6 +459,8 @@ end
 function GM:PlayerInitialSpawn( ply )
 	ply:Spectate( OBS_MODE_ROAMING )
 	ply.ConnectScreen = true
+	--net.Start("CharReady")
+	--net.Send(ply)
 	net.Start( "ShopTable" )
 		net.WriteTable( GAMEMODE.DayZ_Shops[ "shop_buy" ] )
 	net.Send( ply )
@@ -536,7 +537,6 @@ function GM:PlayerSetHandsModel( ply, ent )
 end
 
 function GM:PlayerAuthed( ply )
-	--load_player( ply )
 	ply:Spectate( OBS_MODE_ROAMING )
 	ply:SetKeyValue("rendermode", RENDERMODE_TRANSTEXTURE)
 	ply:SetKeyValue("renderamt", "0")
@@ -545,8 +545,7 @@ function GM:PlayerAuthed( ply )
 	ply:Freeze(true)
 	ply:SetNWInt( "TagTime", 0 )	
 	ply.ConnectScreen = true
-	net.Start("CharReady")
-	net.Send(ply)
+
 end
 
 local function SaveStats( ply )

@@ -6,12 +6,7 @@ net.Receive("CharSelect", function(len)
 	GUI_Select_Model()
 end)
 
-net.Receive("CharReady", function(len)
-	GUI_ReadyToPlay()
-end)
-
 PlayMusicOnce = 1
-
 --------------------------------------------------------------------------------------------------------------
 
 -- THIS CODE WILL BE RELEASED AS A PART OF STEEZE_LIB
@@ -61,16 +56,19 @@ local PlayerModels = MaleModels;
 local IsInitialized = false
 local ShouldSelectModel = false
 local function SelectModelWait()
+	GUI_ReadyToPlay()
 	IsInitialized = true
 	if (ShouldSelectModel) then
 		GUI_Select_Model()
 	end
+	
+	
 end
 hook.Add("InitPostEntity", "SelectModelWait", SelectModelWait)
 
-local cyb_mouseover = Color(41,128,185,80)
+local cyb_mouseover = Color(172,0,0,80)
 local cyb_cat_mouseover = Color(220,220,220,10)
-local cyb_cat_mouseover_text = Color(140,140,140,40)
+local cyb_cat_mouseover_text = Color(140,140,140,150)
 
 function GUI_Select_Model()
 
@@ -90,85 +88,20 @@ function GUI_Select_Model()
 	GUI_Model_Frame:SetDraggable(false)
 
 		GUI_Model_Frame.Paint = function()
-
-		surface.SetDrawColor(Color(0,0,0,255))
-		surface.DrawRect( 0, 0, ScrW(), ScrH() )
-
-
+			local background = {}			
+			background.origin = Vector(0, 0, 100)
+			background.x = 0
+			background.y = 0
+			background.w = ScrW()
+			background.h = ScrH()
+			background.angles = Angle( 0, 0, 0 )	
+			render.RenderView(background)
+			draw.RoundedBox( 0, 0, 0, ScrW(), 150, Color( 0, 0, 0, 255 ) )
+			draw.RoundedBox( 0, 0, ScrH() - 150, ScrW(), 150, Color( 0, 0, 0, 255 ) )
 		end
 
 	GUI_Model_Frame:MakePopup()
 	GUI_Model_Frame:ShowCloseButton(false)
-
--------------------------------------------------------------------------------------
--- * Makes the Background * - One Day Soon
-
-	cyb_animated_bg = vgui.Create("DPanel", GUI_Model_Frame)
-	cyb_animated_bg:SetSize( ScrW(), ScrH() )
-	cyb_animated_bg:SetPos(0, 0 - ScrH() )
-	
-
-	cyb_animated_bg:MoveTo( 0 , ScrH(), 60, 0, -1, nil)
-
-
-		cyb_animated_bg.Paint = function()
-
-			local upmat = Material("gui/gradient_up")
-			local downmat = Material("gui/gradient_down")
-
-			surface.SetDrawColor(Color(41,128,185,80))
-			surface.SetMaterial( upmat )
-			surface.DrawTexturedRect( 0, 0, ScrW(), ScrH() / 2)
-			surface.SetMaterial( downmat )
-			surface.DrawTexturedRect( 0, ScrH() /2, ScrW(), ScrH() / 2)
-
-		end
-
-
--- CybGmod.net Takes Hexagons to a whole new level. Special thanks to Kamshak for
--- pointing my non mathmatical ass in the right direction and looter for telling
--- my ass to use derma.
-
-	cyb_Hexagons = vgui.Create("DIconLayout", GUI_Model_Frame)
-	cyb_Hexagons:SetSize(ScrW() +100, ScrH() + 100)
-	cyb_Hexagons:SetPos(-50,-50)
-	cyb_Hexagons:SetSpaceX( 0 )
-	cyb_Hexagons:SetSpaceY( 80 )
-
-	x_Hexagons = vgui.Create("DIconLayout", GUI_Model_Frame)
-	x_Hexagons:SetSize(ScrW() +100, ScrH() + 100)
-	x_Hexagons:SetPos(0,40)
-	x_Hexagons:SetSpaceX( 0 )
-	x_Hexagons:SetSpaceY( 80 )
-
-	for i = 1, 150 do
-
-		cyb_hex = cyb_Hexagons:Add("DPanel")
-		cyb_hex:SetSize(100,100)
-
-			cyb_hex.Paint = function()
-
-				draw.Hexagon( 50, 50, 50, Color(0,0,0,255) )
-
-			end
-
-		x_hex = x_Hexagons:Add("DPanel")
-		x_hex:SetSize(100,100)
-
-			x_hex.Paint = function()
-
-				draw.Hexagon( 50, 50, 50, Color(0,0,0,255) )
-
-			end
-
-	end
-
-
-
-
-
--------------------------------------------------------------------------------------
---STEEZE SLICES THE CAKE... BITCH - *Chucks the Old Shit in Some Derma for Later*
 
 	surface.CreateFont( "char_title", { font = "Segoe UI Bold", size = 48, antialias = true })
 	surface.CreateFont( "char_options", { font = "Segoe UI Bold", size = 48, antialias = true, shadow = true, outline = true })
@@ -178,18 +111,14 @@ function GUI_Select_Model()
 	GUI_Model_Content:SetPos(0,0)
 
 		GUI_Model_Content.Paint = function()
-
-			draw.SimpleText("SELECT YOUR CHARACTER", "char_title", ScrW() / 2, 50, Color(255,255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-
-			--draw.DrawText("Body Type "..(!UsingCustomModel and  "("..Head.."/"..#PlayerModels[Outfit]..")" or ""), "ScoreboardContent", ScrW()/2-btnMarginLeft-10, ScrH()*0.15+15, Color(255, 255, 255, 255),TEXT_ALIGN_RIGHT)
-			--draw.DrawText("Gender "..(!UsingCustomModel and  "("..(Gender == 1 and "Female" or "Male")..")" or ""), "ScoreboardContent", ScrW()/2-btnMarginLeft-10, ScrH()*0.55+15, Color(255, 255, 255, 255),TEXT_ALIGN_RIGHT)
-			--draw.DrawText("Clothes "..(!UsingCustomModel and  "("..Outfit.."/"..#PlayerModels..")" or "") , "ScoreboardContent", ScrW()/2-btnMarginLeft-10, ScrH()*0.35+15, Color(255, 255, 255, 255),TEXT_ALIGN_RIGHT)
-
+		
+			draw.SimpleText("SELECT YOUR CHARACTER", "ScoreboardHeader",ScrW() / 2, 100, Color(255,255,255,255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+			
 		end
 
 	GUI_Model_Cat_Body = vgui.Create("DPanel", GUI_Model_Content)
-	GUI_Model_Cat_Body:SetSize( ScrW(), ScrH() / 3 )
-	GUI_Model_Cat_Body:SetPos( 0 , 0 )
+	GUI_Model_Cat_Body:SetSize( ScrW(), (ScrH() / 3) - 150)
+	GUI_Model_Cat_Body:SetPos( 0 , 150 )
 
 		GUI_Model_Cat_Body.Paint = function(self)
 
@@ -202,7 +131,7 @@ function GUI_Select_Model()
 
 			end
 
-			draw.SimpleText("BODY", "char_options", self:GetWide() / 3, self:GetTall() / 2, cyb_cat_mouseover_text, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
+			draw.SimpleText("HEAD", "char_options", self:GetWide() / 3, self:GetTall() / 2, cyb_cat_mouseover_text, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
 
 			draw.SimpleText((!UsingCustomModel and  "("..Head.."/"..#PlayerModels[Outfit]..")" or ""), "char_options", self:GetWide() - (self:GetWide() / 3), self:GetTall() / 2, cyb_cat_mouseover_text, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
 
@@ -232,8 +161,8 @@ function GUI_Select_Model()
 		end
 
 	GUI_Model_Cat_Sex = vgui.Create("DPanel", GUI_Model_Content)
-	GUI_Model_Cat_Sex:SetSize( ScrW(), ScrH() / 3 )
-	GUI_Model_Cat_Sex:SetPos( 0 , ScrH() - (ScrH() / 3) )
+	GUI_Model_Cat_Sex:SetSize( ScrW(), ScrH() / 3 -150)
+	GUI_Model_Cat_Sex:SetPos( 0 , (ScrH() - (ScrH() / 3)) )
 
 		GUI_Model_Cat_Sex.Paint = function(self)
 
@@ -278,8 +207,8 @@ function GUI_Select_Model()
 	
 	local GUI_HeadLeft_Button = vgui.Create( "DButton")
 	GUI_HeadLeft_Button:SetParent(GUI_Model_Frame)	
-	GUI_HeadLeft_Button:SetSize( 100, ScrH() / 3 )
-	GUI_HeadLeft_Button:SetPos( 0, 0)
+	GUI_HeadLeft_Button:SetSize( 100, (ScrH() / 3) -150 )
+	GUI_HeadLeft_Button:SetPos( 0, 150)
 	GUI_HeadLeft_Button:SetText( "" )
 
 		GUI_HeadLeft_Button.Paint = function(self)
@@ -296,8 +225,8 @@ function GUI_Select_Model()
 								
 	local GUI_HeadRight_Button = vgui.Create( "DButton")
 	GUI_HeadRight_Button:SetParent(GUI_Model_Frame)	
-	GUI_HeadRight_Button:SetSize( 100, ScrH() / 3 )
-	GUI_HeadRight_Button:SetPos( ScrW() - 100, 0)
+	GUI_HeadRight_Button:SetSize( 100, (ScrH() / 3)-150 )
+	GUI_HeadRight_Button:SetPos( ScrW() - 100, 150)
 	GUI_HeadRight_Button:SetText( "" )
 
 		GUI_HeadRight_Button.Paint = function(self)
@@ -315,7 +244,7 @@ function GUI_Select_Model()
 
 	local GUI_GenderLeft_Button = vgui.Create( "DButton")
 	GUI_GenderLeft_Button:SetParent(GUI_Model_Frame)	
-	GUI_GenderLeft_Button:SetSize( 100, ScrH() / 3 )
+	GUI_GenderLeft_Button:SetSize( 100, (ScrH() / 3) - 150)
 	GUI_GenderLeft_Button:SetPos( 0, ScrH() - ( ScrH() / 3 ) )
 	GUI_GenderLeft_Button:SetText( "" )
 
@@ -334,7 +263,7 @@ function GUI_Select_Model()
 								
 	local GUI_GenderRight_Button = vgui.Create( "DButton")
 	GUI_GenderRight_Button:SetParent(GUI_Model_Frame)	
-	GUI_GenderRight_Button:SetSize( 100, ScrH() / 3 )
+	GUI_GenderRight_Button:SetSize( 100, (ScrH() / 3) - 150 )
 	GUI_GenderRight_Button:SetPos( ScrW() - 100, ScrH() - ( ScrH() / 3) )
 	GUI_GenderRight_Button:SetText( "" )
 
@@ -391,8 +320,8 @@ function GUI_Select_Model()
 								
 	local GUI_ConfirmChoice_Button = vgui.Create( "DButton")
 	GUI_ConfirmChoice_Button:SetParent(GUI_Model_Frame)	
-	GUI_ConfirmChoice_Button:SetSize( 300, 60 )
-	GUI_ConfirmChoice_Button:SetPos( (ScrW() / 2) - 150, ScrH() - 120 )
+	GUI_ConfirmChoice_Button:SetSize( 300, 50 )
+	GUI_ConfirmChoice_Button:SetPos( (ScrW() / 2) - 150, ScrH() - 100 )
 	GUI_ConfirmChoice_Button:SetText( "" )
 
 		GUI_ConfirmChoice_Button.Paint = function(self)
@@ -409,7 +338,7 @@ function GUI_Select_Model()
 
 			end
 
-			draw.SimpleText("CONFIRM", "char_title", self:GetWide() / 2, 5, Color(255,255,255,255), TEXT_ALIGN_CENTER)
+			draw.SimpleText("CONFIRM", "ScoreboardHeader", self:GetWide() / 2, 5, Color(255,255,255,255), TEXT_ALIGN_CENTER)
 
 		end
 
@@ -470,26 +399,54 @@ function GUI_Select_Model()
 		end
 end
 
-
 function GUI_ReadyToPlay()
+	surface.CreateFont( "game_title", { font = "Segoe UI Bold", size = 196, antialias = true })
+	surface.CreateFont( "game_present", { font = "Segoe UI Bold", size = 32, antialias = true })
 	local ConfirmWindow = vgui.Create("DFrame")
 	ConfirmWindow:SetTitle("")
 	ConfirmWindow:SetSize(ScrW() ,ScrH())
 	ConfirmWindow:Center()
 	ConfirmWindow:SetDraggable(false)
 	ConfirmWindow.Paint = function()
-			draw.RoundedBox(0,0,0,ConfirmWindow:GetWide(),ConfirmWindow:GetTall(),Color( 0, 0, 0, 10 ))
-			draw.DrawText("Are you ready to brave the hordes?", "ScoreboardHeader", ScrW()/2, ScrH() / 2 - 25, Color(255, 255, 255, 255),TEXT_ALIGN_CENTER)
-		end
+		--if BackGroundLoaded == true then
+			local background = {}			
+			background.origin = Vector(5321,-5927,70)
+			background.x = 0
+			background.y = 0
+			background.w = ScrW()
+			background.h = ScrH()
+			background.angles = Angle( 0, -75, 0 )	
+			render.RenderView(background)
+			draw.RoundedBox( 0, 0, 0, ScrW(), 150, Color( 0, 0, 0, 255 ) )
+			draw.RoundedBox( 0, 0, ScrH() - 150, ScrW(), 150, Color( 0, 0, 0, 255 ) )	
+			--draw.RoundedBox(0,0,0,ConfirmWindow:GetWide(),ConfirmWindow:GetTall(),Color( 0, 0, 0, 10 ))
+			draw.DrawText("Are you ready to brave the hordes?", "ScoreboardHeader", ScrW()/2, ScrH() - 95, Color(255, 255, 255, 100),TEXT_ALIGN_CENTER)
+			draw.DrawText("presents", "game_present", (ScrW()/5)*3.15, ScrH()/3, Color(255, 255, 255, 50),TEXT_ALIGN_CENTER)
+			draw.DrawText("DayZ", "game_title", (ScrW()/5)*3.1, (ScrH()/5)*2, Color(255, 255, 255, 50),TEXT_ALIGN_CENTER)
+		--end
+	end
+	
+	local DIconTripsTown = vgui.Create("DImage")
+	DIconTripsTown:SetParent(ConfirmWindow)
+	DIconTripsTown:SetPos( (ScrW()/5)*3,ScrH()/5)
+	DIconTripsTown:SetImage("vgui/logo_tripstown")
+	DIconTripsTown:SetSize(128,128)
+	
 	local DcButton = vgui.Create("DButton")
 	DcButton:SetParent(ConfirmWindow)
 	DcButton:SetSize( btnMarginLeft*2, 50 )
-	DcButton:SetPos( ScrW()/2-btnMarginLeft, ScrH()/2+125 )
-	DcButton:SetText("No, take me away!")
+	DcButton:SetPos( ((ScrW()/4)*3) - btnMarginLeft, ScrH() - 100 )
+	DcButton:SetText(" ")
 	DcButton:SetTextColor( Color(255,255,255,255) )
 	DcButton.Paint = function(self)
+		if self.Hovered then
 			surface.SetDrawColor(cyb_mouseover)
 			surface.DrawRect( 0, 0, self:GetWide(), self:GetTall())
+		else
+			surface.SetDrawColor(cyb_cat_mouseover)
+			surface.DrawRect( 0, 0, self:GetWide(), self:GetTall())
+		end
+		draw.SimpleText("No (Disconnect)", "ScoreboardHeader", self:GetWide() / 2, 5, Color(255,255,255,100), TEXT_ALIGN_CENTER)
 	end
 	DcButton.DoClick = function()
 			RunConsoleCommand("disconnect")
@@ -499,13 +456,19 @@ function GUI_ReadyToPlay()
 	local ConfirmButton = vgui.Create( "DButton")
 	ConfirmButton:SetParent(ConfirmWindow)
 	ConfirmButton:SetSize( btnMarginLeft*2, 50 )
-	ConfirmButton:SetPos( ScrW()/2-btnMarginLeft, ScrH()/2+25 )
-	ConfirmButton:SetText( "Yes, I'm ready to split some skulls." )
+	ConfirmButton:SetPos( ScrW()/4 - btnMarginLeft, ScrH() - 100 )
+	ConfirmButton:SetText( " " )
 	ConfirmButton:SetTextColor( Color(255,255,255,255) )
 	ConfirmButton.Paint = function(self)
+		if self.Hovered then
 			surface.SetDrawColor(cyb_mouseover)
 			surface.DrawRect( 0, 0, self:GetWide(), self:GetTall())
+		else
+			surface.SetDrawColor(cyb_cat_mouseover)
+			surface.DrawRect( 0, 0, self:GetWide(), self:GetTall())
 		end
+		draw.SimpleText("Yes (Join Game)", "ScoreboardHeader", self:GetWide() / 2, 5, Color(255,255,255,100), TEXT_ALIGN_CENTER)
+	end
 
 	ConfirmButton.DoClick = function()
 			RunConsoleCommand("ReadyCharacter")
@@ -516,4 +479,6 @@ function GUI_ReadyToPlay()
 
 	ConfirmWindow:MakePopup()
 	ConfirmWindow:ShowCloseButton(false)
+	
+	
 end
