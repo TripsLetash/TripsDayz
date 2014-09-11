@@ -1,6 +1,18 @@
 util.AddNetworkString( "CharSelect" )
 util.AddNetworkString( "ShopTable" )
 
+local function SetUpBackgrounds(ply)
+	AddOriginToPVS( Vector(0, 0, 100) )
+	AddOriginToPVS( Vector(5321,-5927,70) )
+	AddOriginToPVS( Vector(5386,-6329,0) )
+	AddOriginToPVS( Vector(5683,-6282,0) )
+	AddOriginToPVS( Vector(5264,-6048,54) )
+	AddOriginToPVS( Vector(666,220,32) )
+	AddOriginToPVS( Vector(1148,333,32))
+	AddOriginToPVS( Vector(772,-163,32) )
+end
+hook.Add("SetupPlayerVisibility", "SetUpBackgrounds", SetUpBackgrounds)
+
 function PMETA:UpdatePerks( ignoresql )
 	self.Perk1 = false
 	self.Perk2 = false
@@ -214,6 +226,7 @@ function player_defaults( ply, reset )
 	end
 	
 	if not reset then
+		SetUpBackgrounds(ply)
 		net.Start( "CharSelect" )
 		net.Send( ply )
 	end
@@ -457,6 +470,7 @@ function reset_steamid( steamid )
 end
 
 function GM:PlayerInitialSpawn( ply )
+	SetUpBackgrounds(ply)
 	ply:Spectate( OBS_MODE_ROAMING )
 	ply.ConnectScreen = true
 	--net.Start("CharReady")

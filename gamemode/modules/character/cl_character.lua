@@ -98,6 +98,9 @@ function GUI_Select_Model()
 			render.RenderView(background)
 			draw.RoundedBox( 0, 0, 0, ScrW(), 150, Color( 0, 0, 0, 255 ) )
 			draw.RoundedBox( 0, 0, ScrH() - 150, ScrW(), 150, Color( 0, 0, 0, 255 ) )
+			surface.SetMaterial(Material("filmgrain/filmgrain"))
+			surface.SetDrawColor(0, 0, 0, 60)
+			surface.DrawTexturedRectUV(0, 0, ScrW(), ScrH(), 2, 2, 0, 0)	
 		end
 
 	GUI_Model_Frame:MakePopup()
@@ -407,23 +410,20 @@ function GUI_ReadyToPlay()
 	ConfirmWindow:SetSize(ScrW() ,ScrH())
 	ConfirmWindow:Center()
 	ConfirmWindow:SetDraggable(false)
-	ConfirmWindow.Paint = function()
-		--if BackGroundLoaded == true then
+	ConfirmWindow.Paint = function()		
 			local background = {}			
-			background.origin = Vector(5321,-5927,70)
+			background.origin = Vector(5321,-5927,70)     --position for your background
 			background.x = 0
 			background.y = 0
 			background.w = ScrW()
 			background.h = ScrH()
-			background.angles = Angle( 0, -75, 0 )	
+			background.angles = Angle( 0, -75, 0 )		  --Angle for the background-view
 			render.RenderView(background)
-			draw.RoundedBox( 0, 0, 0, ScrW(), 150, Color( 0, 0, 0, 255 ) )
-			draw.RoundedBox( 0, 0, ScrH() - 150, ScrW(), 150, Color( 0, 0, 0, 255 ) )	
-			--draw.RoundedBox(0,0,0,ConfirmWindow:GetWide(),ConfirmWindow:GetTall(),Color( 0, 0, 0, 10 ))
-			draw.DrawText("Are you ready to brave the hordes?", "ScoreboardHeader", ScrW()/2, ScrH() - 95, Color(255, 255, 255, 100),TEXT_ALIGN_CENTER)
+			draw.RoundedBox( 0, 0, 0, ScrW(), 150, Color( 0, 0, 0, 255 ) )   			  --letterbox
+			draw.RoundedBox( 0, 0, ScrH() - 150, ScrW(), 150, Color( 0, 0, 0, 255 ) )	  --letterbox			
+			draw.DrawText("Are you ready to brave the horde?", "ScoreboardHeader", ScrW()/2, ScrH() - 95, Color(255, 255, 255, 100),TEXT_ALIGN_CENTER)
 			draw.DrawText("presents", "game_present", (ScrW()/5)*3.15, ScrH()/3, Color(255, 255, 255, 50),TEXT_ALIGN_CENTER)
-			draw.DrawText("DayZ", "game_title", (ScrW()/5)*3.1, (ScrH()/5)*2, Color(255, 255, 255, 50),TEXT_ALIGN_CENTER)
-		--end
+			draw.DrawText("DayZ", "game_title", (ScrW()/5)*3.1, (ScrH()/5)*2, Color(255, 255, 255, 50),TEXT_ALIGN_CENTER)		
 	end
 	
 	local DIconTripsTown = vgui.Create("DImage")
@@ -431,6 +431,20 @@ function GUI_ReadyToPlay()
 	DIconTripsTown:SetPos( (ScrW()/5)*3,ScrH()/5)
 	DIconTripsTown:SetImage("vgui/logo_tripstown")
 	DIconTripsTown:SetSize(128,128)
+
+	local GrainWindow = vgui.Create("DFrame")
+	GrainWindow:SetTitle("")
+	GrainWindow:SetParent(ConfirmWindow)
+	GrainWindow:SetSize(ScrW() ,ScrH())
+	GrainWindow:Center()
+	GrainWindow:SetDraggable(false)
+	GrainWindow:ShowCloseButton(false)
+	--surface.PlaySound( "music/radio1.mp3" ) -- Want this to work, will work on it later
+	GrainWindow.Paint = function()		
+		surface.SetMaterial(Material("filmgrain/filmgrain"))
+		surface.SetDrawColor(0, 0, 0, 60)
+		surface.DrawTexturedRectUV(0, 0, ScrW(), ScrH(), 2, 2, 0, 0)	
+	end	
 	
 	local DcButton = vgui.Create("DButton")
 	DcButton:SetParent(ConfirmWindow)
@@ -475,10 +489,8 @@ function GUI_ReadyToPlay()
 			timer.Simple(1,function()
 				ConfirmWindow:Remove() 
 			end)
-		end
-
+	end	
+	
 	ConfirmWindow:MakePopup()
 	ConfirmWindow:ShowCloseButton(false)
-	
-	
 end
