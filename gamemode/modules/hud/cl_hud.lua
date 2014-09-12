@@ -488,7 +488,7 @@ local function HUDPaint( )
 		DrawBleeding()
 		DrawHealth()		
 		--makelogo()
-		drawvehiclehud()
+		--drawvehiclehud()
 		
 		WSWITCH:Draw(LocalPlayer())
 	end
