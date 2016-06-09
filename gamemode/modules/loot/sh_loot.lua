@@ -52,7 +52,7 @@ GM.DayZ_Items = {
 		SpawnChance  =  40,
 		Melee		 =  true,
 		SpawnOffset	 =  Vector(0,0,0),
-		Weapon		 =  "weapon_bat_dayz",
+		Weapon		 =  "melee_bat_dayz",
 		EatFunction	 =  function(ply, item) ply:EatHurt(5, 50) end,	
 	},
 
@@ -69,7 +69,7 @@ GM.DayZ_Items = {
 		SpawnChance  = 1,
 		Melee		 = true,
 		SpawnOffset	 = Vector(0,0,0),
-		Weapon		 = "weapon_yamato",	
+		Weapon		 = "melee_yamato",	
 		EatFunction  = function(ply, item) ply:EatHurt(5, 50) end,	
 	},
 	
@@ -86,7 +86,7 @@ GM.DayZ_Items = {
 		SpawnChance = 15,
 		Melee = true,
 		SpawnOffset = Vector(0,0,0),
-		Weapon = "weapon_bowie",
+		Weapon = "melee_bowie",
 		EatFunction = function(ply, item) ply:EatHurt(5, 50) end,	
 	},
 
@@ -103,7 +103,7 @@ GM.DayZ_Items = {
 		SpawnChance = 15,
 		Melee = true,
 		SpawnOffset = Vector(0,0,0),
-		Weapon = "swb_knife",
+		Weapon = "melee_knife",
 		EatFunction = function(ply, item) ply:EatHurt(5, 50) end,	
 	},
 	
@@ -120,7 +120,7 @@ GM.DayZ_Items = {
 		SpawnChance = 40,
 		Melee = true,
 		SpawnOffset = Vector(0,0,0),
-		Weapon = "weapon_crowbar_dayz",
+		Weapon = "melee_crowbar_dayz",
 		EatFunction = function(ply, item) ply:EatHurt(5, 50) end,	
 	},
 	
@@ -547,15 +547,15 @@ GM.DayZ_Items = {
 		Angle = Angle(0,0,2),
 		Desc = "Army issue medicinal gauzes.",
 		Model = "models/w_models/weapons/w_eq_medkit.mdl",
-		Weight = 1,
+		Weight = 2,
 		LootType = { "Medical" },
-		Price = 100,
-		Credits = 10,	
-		SpawnChance = 15, -- Out of 100
+		Price = 50,
+		Credits = 5,	
+		SpawnChance = 60, -- Out of 100
 		SpawnOffset = Vector(0,0,0),
 		Craftable = true,
-		ReqCraft = { Slot1 = "item_fabric", Slot2="item_aloecream", Slot3="item_fabric" },
-		Function = function(ply, item) ply:Heal(55) end,		
+		ReqCraft = { Slot1 = "item_fabric", Slot2="item_fabric" },
+		Function = function(ply, item) ply:Bleeding(0) end,		
 	},
 
 	{
@@ -614,7 +614,7 @@ GM.DayZ_Items = {
 		Secondary = true,
 		Craftable = true,
 		ReqCraft = { Slot3 = "item_part_g", Slot4 = "item_part_c" },
-		Weapon = "swb_deagle",
+		Weapon = "swb_secondary_deagle",
 		EatFunction = function(ply, item) ply:EatHurt(5, 50) end,	
 	},
 	
@@ -635,7 +635,7 @@ GM.DayZ_Items = {
 		Secondary = true,
 		Craftable = true,
 		ReqCraft = { Slot2="item_part_g", Slot4="item_part_d" },
-		Weapon = "swb_fiveseven",
+		Weapon = "swb_secondary_fiveseven",
 		EatFunction = function(ply, item) ply:EatHurt(5, 50) end,
 	},
 	
@@ -656,7 +656,7 @@ GM.DayZ_Items = {
 		Secondary = true,
 		Craftable = true,
 		ReqCraft = { Slot1="item_part_b", Slot2="item_part_f" },
-		Weapon = "swb_357",
+		Weapon = "swb_secondary_357",
 		EatFunction = function(ply, item) ply:EatHurt(5, 50) end,	
 	},
 
@@ -677,7 +677,7 @@ GM.DayZ_Items = {
 		Primary = true, 
 		Craftable = true,
 		ReqCraft = { Slot2="item_part_a", Slot3="item_part_d", Slot5="item_part_c" },
-		Weapon = "swb_ak47",
+		Weapon = "swb_primary_ak47",
 		EatFunction = function(ply, item) ply:EatHurt(5, 50) end,	
 	},
 	
@@ -698,7 +698,7 @@ GM.DayZ_Items = {
 		Primary = true, 
 		Craftable = true,
 		ReqCraft = { Slot1="item_part_a", Slot4="item_part_e", Slot5="item_part_f" },
-		Weapon = "swb_g3sg1",
+		Weapon = "swb_primary_g3sg1",
 		EatFunction = function(ply, item) ply:EatHurt(5, 50) end,	
 	},
 	
@@ -719,7 +719,7 @@ GM.DayZ_Items = {
 		Primary = true, 
 		Craftable = true,
 		ReqCraft = { Slot3="item_part_a", Slot4="item_part_b", Slot5="item_part_d" },
-		Weapon = "swb_m4a1",
+		Weapon = "swb_primary_m4a1",
 		EatFunction = function(ply, item) ply:EatHurt(5, 50) end,	
 	},
 	
@@ -740,7 +740,7 @@ GM.DayZ_Items = {
 		Primary = true, 
 		Craftable = true,
 		ReqCraft = { Slot2="item_part_c", Slot3="item_part_b", Slot4="item_part_a", Slot5="item_part_e" },
-		Weapon = "swb_m3super90",
+		Weapon = "swb_primary_m3super90",
 		EatFunction = 
 			function(ply,item)
 				ply:EatHurt(5, 50)
@@ -764,7 +764,7 @@ GM.DayZ_Items = {
 		Primary = true, 
 		Craftable = true,
 		ReqCraft = { Slot1="item_part_a", Slot2="item_part_d", Slot4="item_part_g" },
-		Weapon = "swb_famas",
+		Weapon = "swb_primary_famas",
 		EatFunction = function(ply, item) ply:EatHurt(5, 50) end,	
 	},
 	
@@ -785,7 +785,7 @@ GM.DayZ_Items = {
 		Secondary = true,
 		Craftable = true,
 		ReqCraft = { Slot2="item_part_g", Slot3="item_part_e" },
-		Weapon = "swb_glock18",
+		Weapon = "swb_secondary_glock18",
 		EatFunction = function(ply,item) ply:EatHurt(5, 50) end,	
 	},
 	
@@ -806,7 +806,7 @@ GM.DayZ_Items = {
 		Primary = true, 
 		Craftable = true,
 		ReqCraft = { Slot3="item_part_a", Slot4="item_part_e", Slot5="item_part_g" },
-		Weapon = "swb_scout",
+		Weapon = "swb_primary_scout",
 		EatFunction = function(ply, item) ply:EatHurt(5, 50) end,	
 	},
 	
@@ -827,7 +827,7 @@ GM.DayZ_Items = {
 		Primary = true, 
 		Craftable = true,
 		ReqCraft = { Slot1="item_part_a", Slot2="item_part_c", Slot3="item_part_e", Slot4="item_part_f", Slot5="item_part_h" },
-		Weapon = "swb_awp",
+		Weapon = "swb_primary_awp",
 		EatFunction = function(ply, item) ply:EatHurt(5, 50) end,	
 	},
 

@@ -3,7 +3,7 @@ MapIndex[1] = "rp_apocalypse"
 MapIndex[2] = "gm_atomic"
 MapIndex[3] = "rp_stalker"
 MapIndex[4] = "rp_evocity2_v2p"
-MapIndex[5] = "rp_pripyat"
+MapIndex[5] = "dz_tripstown_necro_forest"
 
 MaleModels = {}
 MaleModels[1] = {

@@ -1,6 +1,12 @@
 util.AddNetworkString( "CharSelect" )
 util.AddNetworkString( "ShopTable" )
 
+local function SetUpBackgrounds(ply)
+	AddOriginToPVS( Vector(0, 0, 100) )
+	AddOriginToPVS( Vector(5321,-5927,70) )
+end
+hook.Add("SetupPlayerVisibility", "SetUpBackgrounds", SetUpBackgrounds)
+
 function PMETA:UpdatePerks( ignoresql )
 	self.Perk1 = false
 	self.Perk2 = false
@@ -61,6 +67,7 @@ function PHDayZ_SetupDatabase()
 			`kills` smallint(3) unsigned NOT NULL,
 			`credits` int(10) unsigned NOT NULL,
 			`extraslots` tinyint(3) unsigned NOT NULL,
+			`bleeding` smallint(4) unsigned NOT NULL,
 			PRIMARY KEY (`id`),
 			KEY `steamid` (`steamid`)
 		)
@@ -114,13 +121,13 @@ function PHDayZ_SetupDatabase()
 end
 
 local function get_stats( ply )
-	local mapindex = 0
-	for k, v in pairs( MapIndex ) do
-		if v == string.lower( game.GetMap() ) then
-			mapindex = tonumber( k )
-			break
-		end
-	end
+	local mapindex = 5
+	--for k, v in pairs( MapIndex ) do
+	--	if v == string.lower( game.GetMap() ) then
+	--		mapindex = tonumber( k )
+	--		break
+	--	end
+	--end
 
 	local alive = 1
 	if ply.Dead == true then
@@ -142,7 +149,8 @@ local function get_stats( ply )
 		ply:GetNWInt( "lvl" ),
 		ply:Frags(),
 		ply:GetNWInt( "credits" ),
-		ply:GetNWInt( "extraslots" )
+		ply:GetNWInt( "extraslots" ),
+		ply.Bleed
 	}
 end
 
@@ -150,7 +158,7 @@ function save_player( ply, func )
 	if ply.New or !ply.ID then return false end
 
 	local stats = get_stats( ply )
-	PLib:RunPreparedQuery({ sql = "UPDATE `players` SET `gender` = " .. stats[ 1 ] .. ", `face` = " .. stats[ 2 ] .. ", `hat` = " .. stats[ 3 ] .. ", `clothes` = " .. stats[ 4 ] .. ", `health` = " .. stats[ 5 ] .. ", `thirst` = " .. stats[ 6 ] .. ", `hunger` = " .. stats[ 7 ] .. ", `alive` = " .. stats[ 8 ] .. ", `xpos` = " .. stats[ 9 ].x .. ", `ypos` = " .. stats[ 9 ].y .. ", `zpos` = " .. stats[ 9 ].z .. ", `mapindex` = " .. stats[ 10 ] .. ", `xp` = " .. stats[ 11 ] .. ", `lvl` = " .. stats[ 12 ] .. ", `kills` = " .. stats[ 13 ] .. ", `credits` = " .. stats[ 14 ] .. ", `extraslots` = " .. stats[ 15 ] .. " WHERE `id` = " .. ply.ID .. ";", 
+	PLib:RunPreparedQuery({ sql = "UPDATE `players` SET `gender` = " .. stats[ 1 ] .. ", `face` = " .. stats[ 2 ] .. ", `hat` = " .. stats[ 3 ] .. ", `clothes` = " .. stats[ 4 ] .. ", `health` = " .. stats[ 5 ] .. ", `thirst` = " .. stats[ 6 ] .. ", `hunger` = " .. stats[ 7 ] .. ", `alive` = " .. stats[ 8 ] .. ", `xpos` = " .. stats[ 9 ].x .. ", `ypos` = " .. stats[ 9 ].y .. ", `zpos` = " .. stats[ 9 ].z .. ", `mapindex` = " .. stats[ 10 ] .. ", `xp` = " .. stats[ 11 ] .. ", `lvl` = " .. stats[ 12 ] .. ", `kills` = " .. stats[ 13 ] .. ", `credits` = " .. stats[ 14 ] .. ", `extraslots` = " .. stats[ 15 ] .. ", `bleeding` = " .. stats[ 16 ] .. " WHERE `id` = " .. ply.ID .. ";", 
 	callback = function( data )
 		if isfunction( func ) then
 			func()
@@ -168,7 +176,7 @@ end
 
 local function new_player( ply, func )
 	local stats = get_stats( ply )
-	PLib:RunPreparedQuery({ sql = "INSERT INTO `players` ( `steamid`, `gender`, `face`, `hat`, `clothes`, `health`, `thirst`, `hunger`, `alive`, `xpos`, `ypos`, `zpos`, `mapindex`, `xp`, `lvl`, `kills`, `credits`, `extraslots` ) VALUES ( '" .. ply:SteamID() .. "', " .. stats[ 1 ] .. ", " .. stats[ 2 ] .. ", " .. stats[ 3 ] .. ", " .. stats[ 4 ] .. ", " .. stats[ 5 ] .. ", " .. stats[ 6 ] .. ", " .. stats[ 7 ] .. ", " .. stats[ 8 ] .. ", " .. stats[ 9 ].x .. ", " .. stats[ 9 ].y .. ", " .. stats[ 9 ].z .. ", " .. stats[ 10 ] .. ", " .. stats[ 11 ] .. ", " .. stats[ 12 ] .. ", " .. stats[ 13 ] .. ", " .. stats[ 14 ] .. ", " .. stats[ 15 ] .. " );", 
+	PLib:RunPreparedQuery({ sql = "INSERT INTO `players` ( `steamid`, `gender`, `face`, `hat`, `clothes`, `health`, `thirst`, `hunger`, `alive`, `xpos`, `ypos`, `zpos`, `mapindex`, `xp`, `lvl`, `kills`, `credits`, `extraslots`, `bleeding` ) VALUES ( '" .. ply:SteamID() .. "', " .. stats[ 1 ] .. ", " .. stats[ 2 ] .. ", " .. stats[ 3 ] .. ", " .. stats[ 4 ] .. ", " .. stats[ 5 ] .. ", " .. stats[ 6 ] .. ", " .. stats[ 7 ] .. ", " .. stats[ 8 ] .. ", " .. stats[ 9 ].x .. ", " .. stats[ 9 ].y .. ", " .. stats[ 9 ].z .. ", " .. stats[ 10 ] .. ", " .. stats[ 11 ] .. ", " .. stats[ 12 ] .. ", " .. stats[ 13 ] .. ", " .. stats[ 14 ] .. ", " .. stats[ 15 ] .. ", " .. stats[ 16 ] .. " );", 
 	callback = function( data )
 		ply.ID = data
 		ply.New = nil
@@ -185,8 +193,9 @@ function player_defaults( ply, reset )
 	ply:SetHealth( 100 )
 	ply.Thirst = 100
 	ply.Hunger = 100
+	ply.Bleed = 0
 	
-	ply:SetPos( Vector( 13835, 6190, 43 ) )
+	ply:SetPos( Vector(0,0,-1000) )
 	ply:SetModel( "models/player/group01/male_01.mdl" )
 
 	if reset then
@@ -214,6 +223,7 @@ function player_defaults( ply, reset )
 	end
 	
 	if not reset then
+		SetUpBackgrounds(ply)
 		net.Start( "CharSelect" )
 		net.Send( ply )
 	end
@@ -263,6 +273,7 @@ local function load_player( ply )
 				ply:SetHealth( data[ 8 ] )
 				ply.Thirst = tonumber( data[ 9 ] )
 				ply.Hunger = tonumber( data[ 10 ] )
+				ply.Bleed = tonumber( data [ 20 ] )
 
 				ply:SetNWInt( "xp", tonumber( data[ 15 ] ) )
 				ply:SetFrags( tonumber( data[ 17 ] ) )
@@ -273,10 +284,16 @@ local function load_player( ply )
 				
 				ply:SetNWInt( "credits", tonumber( data[ 18 ] ) )
 				ply:Give( "weapon_EmptyHands" )
-				ply:UpdateCharModel( face, clothes, gender )
-				
+				--ply:UpdateCharModel( face, clothes, gender )
+				timer.Simple(1, function()
+					ply:UpdateCharModel(tonumber( data[ 4 ] ),tonumber( data[ 6 ] ),tonumber( data[ 3 ] ))
+				end)
 				net.Start( "Thirst" )
 					net.WriteUInt( ply.Thirst, 8 )		
+				net.Send( ply )
+
+				net.Start( "Bleed" )
+					net.WriteUInt( ply.Bleed, 8 )		
 				net.Send( ply )
 				
 				net.Start( "Hunger" )
@@ -333,6 +350,7 @@ local function load_player( ply )
 
 			ply:UpdatePerks()
 			ply:CheckUnlocksSilent()
+			--ply.Loading = nil
 		end
 	end })
 end
@@ -356,13 +374,21 @@ local function spawn_defaults( ply )
 
 	if ply.Perk6 == true then
 		ply:GiveItem( "item_flashlight", 1 )
-	end
+	end	
 end
 
 local function confirm_player( ply, cmd, args )
+	ply:SetNWInt( "TagTime", 0 )	
+	ply:SetTeam( 1 )
+	ply.ConnectScreen = nil
+	ply:Freeze(false)
+	ply:SetKeyValue( "rendermode", RENDERMODE_NORMAL )
+	ply:SetKeyValue( "renderamt", "255" )
+	ply:SetCollisionGroup(COLLISION_GROUP_NONE)
+	ply:DrawShadow(true)
 	if ply.Loading == true then
-		ply.SpawnPos = table.Random( Spawns[ string.lower( game.GetMap() ) ] ) + Vector( 0, 0, 30 )
-		ply:SetPos( ply.SpawnPos )
+		ply.SpawnPos = table.Random( Spawns[ string.lower( game.GetMap() ) ] ) + Vector( 0, 0, 30 )		
+		ply:SetPos( ply.SpawnPos )		
 
 		if ply.New == true then
 			new_player( ply, function()	
@@ -373,9 +399,17 @@ local function confirm_player( ply, cmd, args )
 				spawn_defaults( ply )
 			end )
 		end
-	end
+	end	
 end
 concommand.Add( "ConfirmCharacter", confirm_player )
+
+local function ready_player( ply, cmd, args )
+	ply:SetNWInt( "TagTime", 0 )	
+	ply:SetTeam( 1 )
+	ply.ConnectScreen = nil
+	load_player( ply )
+end
+concommand.Add( "ReadyCharacter", ready_player )
 
 function reset_ent( ply )
 	ply:StripWeapons()	
@@ -402,7 +436,8 @@ function reset_ent( ply )
 
 	player_defaults( ply, true )
 
-	ply.SpawnPos = table.Random( Spawns[ string.lower( game.GetMap() ) ] ) + Vector( 0, 0, 30 )
+	--ply.SpawnPos = table.Random( Spawns[ string.lower( game.GetMap() ) ] ) + Vector( 0, 0, 30 )
+	ply.SpawnPos = table.Random( Spawns["PlayerSpawns"] ) + Vector( 0, 0, 30 )
 
 	save_player( ply, function()
 		spawn_defaults( ply )
@@ -439,16 +474,28 @@ function reset_steamid( steamid )
 end
 
 function GM:PlayerInitialSpawn( ply )
-	ply:SetNWInt( "TagTime", 0 )
-	
-	ply:SetTeam( 1 )
-	
+	SetUpBackgrounds(ply)
+	ply:Spectate( OBS_MODE_ROAMING )
+	ply.ConnectScreen = true
+	--net.Start("CharReady")
+	--net.Send(ply)
 	net.Start( "ShopTable" )
 		net.WriteTable( GAMEMODE.DayZ_Shops[ "shop_buy" ] )
 	net.Send( ply )
 end
 
 function GM:PlayerSpawn( ply )
+	if ply.ConnectScreen == true then
+		ply:Spectate( OBS_MODE_ROAMING )
+		ply:Freeze(true) 
+		ply:SetPos( Vector(0,0,-1000) )		
+	else
+		ply:SetKeyValue( "rendermode", RENDERMODE_NORMAL )
+		ply:SetKeyValue( "renderamt", "255" )
+		ply:SetCollisionGroup(COLLISION_GROUP_NONE)
+		ply:DrawShadow(true)
+		ply:Freeze(false)
+	end
 	ply:SetRunSpeed( 250 )
 	ply:SetWalkSpeed( 200 )
 	ply:SetJumpPower( 250 )
@@ -483,13 +530,18 @@ function GM:PlayerSpawn( ply )
 
 		ply.Loading = nil
 	end
-		
+
+	if ply.ConnectScreen then return end		
 	ply:CheckUnlocksSilent()
 	ply:SetupHands()
 	ply:SetFrags( 0 )
 
 	net.Start( "Thirst" )
 		net.WriteUInt( ply.Thirst or 100, 8 )		
+	net.Send( ply )
+
+	net.Start( "Bleed" )
+		net.WriteUInt( ply.Bleed or 0, 8 )		
 	net.Send( ply )
 	
 	net.Start( "Hunger" )
@@ -508,10 +560,15 @@ function GM:PlayerSetHandsModel( ply, ent )
 end
 
 function GM:PlayerAuthed( ply )
-	load_player( ply )
-	ply:Spectate( OBS_MODE_FIXED )
-	
-	ply:SetNWInt( "TagTime", 0 )
+	ply:Spectate( OBS_MODE_ROAMING )
+	ply:SetKeyValue("rendermode", RENDERMODE_TRANSTEXTURE)
+	ply:SetKeyValue("renderamt", "0")
+	ply:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
+	ply:DrawShadow(false)
+	ply:Freeze(true)
+	ply:SetNWInt( "TagTime", 0 )	
+	ply.ConnectScreen = true
+
 end
 
 local function SaveStats( ply )

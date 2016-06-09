@@ -32,13 +32,20 @@ net.Receive( "net_DeathMessage", function( len )
 end)
 
 local LastHungerReceived = LastHungerReceived or 100
+local LastBleedReceived = LastBleedReceived or 0
 local LastThirstReceived = LastThirstReceived or 100
 local LastHungerReceivedTime = LastHungerReceivedTime or CurTime()
+local LastBleedReceivedTime = LastBleedReceivedTime or CurTime()
 local LastThirstReceivedTime = LastThirstReceivedTime or CurTime()
 
 net.Receive("Hunger", function(len)
 	LastHungerReceived = net.ReadUInt(8)
 	LastHungerReceivedTime = CurTime()
+end)
+
+net.Receive("Bleed", function(len)
+	LastBleedReceived = net.ReadUInt(8)
+	LastBleedReceivedTime = CurTime()
 end)
 
 net.Receive("Thirst", function(len)
@@ -48,6 +55,10 @@ end)
 
 local function GetHungerValue()
 	return math.Round( LastHungerReceived - ( ( CurTime() - LastHungerReceivedTime ) / 14 ) )
+end
+
+local function GetBleedValue()
+	return LastBleedReceived
 end
 
 local function GetThirstValue()
@@ -281,7 +292,161 @@ local function swapper()
 
 end
 
+function surface.CircularProgress(x, y, w, h , prg)
+    --[[ 
+        Arguments:
+        x: Where is it drawn on the x-axis of your screen
+        y: Where is it drawn on the y-axis of your screen
+        w: How wide must the image be?
+        h: How high must the image be?
+        partx: Where on the given texture's x-axis can we find the image you want?
+        party: Where on the given texture's y-axis can we find the image you want?
+        partw: How wide is the partial image in the given texture?
+        parth: How high is the partial image in the given texture?
+        texw: How wide is the texture?
+        texh: How high is the texture?
+    ]]--
+     
+    -- Verify that we recieved all arguments
+    flProgress = prg;
+    flEndAngle = 0.5
+
+    if ( m_iProgressDirection == PROGRESS_CW ) then
+        --flEndAngle = flProgress;
+		flEndAngle = ( 1.0 - flProgress );
+    else
+        flEndAngle = ( 1.0 - flProgress );
+    end
+
+    //PaintBackground()
+    DrawCircleSegment( x,y,FGColor, flEndAngle, ( m_iProgressDirection == PROGRESS_CW ) ,w,h,prg);
+
+end;
+
+local M_PI = 3.1415
+
+local SEGMENT_ANGLE  = ( M_PI / 4 )
+
+Segments = 
+{
+
+    { M_PI,         0.5, 1.0, 0.0, 1.0, -1, 0 },
+    { M_PI * 1.25,  0.0, 1.0, 0.0, 0.5, 0, -1 },
+    { M_PI * 1.5,   0.0, 0.5, 0.0, 0.0, 0, -1 },
+    { M_PI * 1.75,  0.0, 0.0, 0.5, 0.0, 1, 0 },
+	{ 0.0,          0.5, 0.0, 1.0, 0.0, 1, 0 },
+    { M_PI * 0.25,  1.0, 0.0, 1.0, 0.5, 0, 1 },
+    { M_PI * 0.5,   1.0, 0.5, 1.0, 1.0, 0, 1 },
+    { M_PI * 0.75,  1.0, 1.0, 0.5, 1.0, -1, 0 }
+};
+
+
+function DrawCircleSegment( x,y ,c, flEndProgress, bClockwise,w,h,progress )
+
+    
+    wide =  w
+    tall = h
+
+    flWide = w;
+    flTall = h;
+
+    flHalfWide = wide / 2;
+    flHalfTall = tall / 2;
+
+    // TODO - if we want to progress CCW, reverse a few things
+
+    flEndProgressRadians = flEndProgress * M_PI * 2;
+
+    cur_wedge = 1
+
+    for i=1,8 do
+
+
+        if ( flEndProgressRadians > Segments[cur_wedge][1]) then
+        
+             trianglevertex = {{ },{ },{ }}
+
+            // vert 0 is ( 0.5, 0.5 )
+
+            trianglevertex[1]["x"] = flHalfWide + x
+            trianglevertex[1]["y"] = flHalfTall + y
+            trianglevertex[1]["u"] = 0.5
+            trianglevertex[1]["v"] = 0.5
+
+            flInternalProgress = flEndProgressRadians - Segments[cur_wedge][1];
+
+            if ( flInternalProgress < SEGMENT_ANGLE ) then
+            
+                // Calc how much of this slice we should be drawing
+
+                if ( i % 2 == 1 ) then
+                
+                    flInternalProgress = SEGMENT_ANGLE - flInternalProgress;
+                end
+
+                flTan = math.tan(flInternalProgress);
+    
+                flDeltaX, flDeltaY = 0;
+
+                if ( i % 2 == 1 ) then
+                
+                    flDeltaX = ( flHalfWide - flHalfTall * flTan ) * Segments[i][6];
+                    flDeltaY = ( flHalfTall - flHalfWide * flTan ) * Segments[i][7];
+                
+                else
+                
+                    flDeltaX = flHalfTall * flTan * Segments[i][6];
+                    flDeltaY = flHalfWide * flTan * Segments[i][7];
+                end
+
+
+
+                trianglevertex[3]["x"] = Segments[i][2] * flWide + flDeltaX + x
+                trianglevertex[3]["y"] = Segments[i][3] * flTall + flDeltaY + y
+                trianglevertex[3]["u"] = Segments[i][2] + ( flDeltaX / flHalfWide ) * 0.5
+                trianglevertex[3]["v"] = Segments[i][3] + ( flDeltaY / flHalfTall ) * 0.5 
+            
+            else
+
+
+                trianglevertex[3]["x"] = flHalfWide + flWide * ( Segments[i][4] - 0.5 ) +x
+                trianglevertex[3]["y"] = flHalfTall + flTall * ( Segments[i][5] - 0.5 ) +y
+                trianglevertex[3]["u"] = Segments[i][4]
+                trianglevertex[3]["v"] = Segments[i][5]
+            end
+
+            trianglevertex[2]["x"] = flHalfWide + flWide * ( Segments[i][2] - 0.5 ) +x 
+            trianglevertex[2]["y"] = flHalfTall + flTall * ( Segments[i][3] - 0.5 ) +y
+            trianglevertex[2]["u"] = Segments[i][2]
+            trianglevertex[2]["v"] = Segments[i][3]
+
+            surface.DrawPoly( trianglevertex );
+
+        end
+
+        cur_wedge = cur_wedge + 1
+        if ( cur_wedge >= 9) then
+            cur_wedge = 1;
+        end
+
+
+    end
+end
+
 local function drawxp()
+	local hud_exp = Material("hud_trips_dayz/hud_exp.png","noclamp smooth")
+	LocalPlayer().CL_Level = LocalPlayer():GetNWInt("lvl") or 1
+	
+	surface.SetMaterial( hud_exp )
+	surface.SetDrawColor(70,70,70,255)
+	surface.CircularProgress(30, ScrH() - 73, 42,42 , 0)
+	surface.SetDrawColor(125,176,220,255)
+	local exp = LocalPlayer():GetNWInt("xp")
+	local exp_amount = 1 - exp/1000
+	surface.CircularProgress(30, ScrH() - 73, 42,42 , exp_amount)	
+	local level = 20
+	draw.DrawText(LocalPlayer().CL_Level,"DermaLarge",51,ScrH()-68, Color(125,176,220,255),TEXT_ALIGN_CENTER)
+/*
 	local plyxp = LocalPlayer():GetNWInt("xp")
 	local SW,SH = ScrW(),ScrH()
 	
@@ -301,7 +466,7 @@ local function drawxp()
 	
 	draw.RoundedBox(0,404/4,SH-92,1,15,Color( 255, 255, 255, 255 ))	-- Black Bar 1
 	draw.RoundedBox(0,404/4*2,SH-92,1,15,Color( 255, 255, 255, 255 ))	-- Black Bar 2
-	draw.RoundedBox(0,404/4*3,SH-92,1,15,Color( 255, 255, 255, 255 ))	-- Black Bar 3
+	draw.RoundedBox(0,404/4*3,SH-92,1,15,Color( 255, 255, 255, 255 ))	-- Black Bar 3*/
 
 end
 
@@ -314,14 +479,16 @@ local function HUDPaint( )
 
 		
 	if LocalPlayer():Alive() then
-		drawleftbg()
-		drawxp()
-		DrawHealth()
+		if LocalPlayer().ConnectScreen == true then return end
+		--drawleftbg()
 		DrawHunger()		
 		DrawThirst()
-		DrawStamina()		
-		makelogo()
-		drawvehiclehud()
+		DrawStamina()
+		drawxp()
+		DrawBleeding()
+		DrawHealth()		
+		--makelogo()
+		--drawvehiclehud()
 		
 		WSWITCH:Draw(LocalPlayer())
 	end
@@ -617,40 +784,65 @@ function makelogo()
 
 end
 
+function NoirMode()
+	local ply = LocalPlayer()	
+		local tab = {}
+		tab["$pp_colour_addr"] = 0
+		tab["$pp_colour_addg" ] = 0
+		tab["$pp_colour_addb" ] = 0
+		tab["$pp_colour_brightness" ] = 0
+		tab["$pp_colour_contrast" ] = 1
+		tab["$pp_colour_colour" ] = (LocalPlayer():Health() / 100) or 0
+		tab["$pp_colour_mulr" ] = 0.05
+		tab["$pp_colour_mulg" ] = 0.05
+		tab["$pp_colour_mulb" ] = 0.05
+		DrawColorModify( tab )	
+end
+hook.Add("RenderScreenspaceEffects", "NoirFunc", NoirMode)
+
 function DrawHealth()
-
-	local maxlen = ( LocalPlayer():Health() / 100 ) * 250
+	local hud_male = Material("hud_trips_dayz/hud_male.png","noclamp smooth")
+	local hud_male_border = Material("hud_trips_dayz/hud_male_border.png","noclamp smooth")
 	
-	draw.RoundedBoxEx(4, 145, ScrH() -73, 252, 27, Color(255,255,255,255), true, true, true, true)
-	draw.RoundedBoxEx(4, 146, ScrH() -72, 250, 25, Color(50,50,50,255), true, true, true, true)
-	
-	if LocalPlayer():Health() >15 then
-		draw.RoundedBoxEx(4, 146, ScrH() -72, maxlen, 25, Color(4,137,216,255), true, true, true, true)
-		draw.RoundedBoxEx(4, 146, ScrH() -72, maxlen, 12, Color(87,192,255,255), true, true, false, false)
+	surface.SetDrawColor(70,70,70,255)
+	surface.SetMaterial( hud_male_border )
+	surface.DrawTexturedRectUV(100, ScrH()-200, 69,165,0.01,0.01,1,1)
+	local health = LocalPlayer():Health()	
+	if health > 50 then
+		surface.SetDrawColor(60,120,64,255)
+	elseif health <= 50 and health > 25 then
+		surface.SetDrawColor(218,153,28,255)
 	else
-		draw.RoundedBoxEx(4, 146, ScrH() -72, maxlen, 25, Color(4,137,216,255), true, false, true, false)
-		draw.RoundedBoxEx(4, 146, ScrH() -72, maxlen, 12, Color(87,192,255,255), true, false, false, false)
-
+		surface.SetDrawColor(132,52,53,255)
 	end
+	surface.SetMaterial( hud_male )
+	surface.DrawTexturedRectUV(100, ScrH()-200, 69,165,0.01,0.01,1,1)
 	
-	draw.DrawText("Health", "Cyb_HudTEXT", 150, ScrH() -72, Color(255, 255, 255, 255),TEXT_ALIGN_LEFT)
-	draw.DrawText(LocalPlayer():Health(), "Cyb_HudTEXT", 390, ScrH() -72, Color(255, 255, 255, 255),TEXT_ALIGN_RIGHT)
+	surface.SetDrawColor(70,70,70,255)
+	surface.SetMaterial( hud_male_border )
 
+	local shift_health = (1 - health/100) 
+	if shift_health > 1 then shift_health = 1 end
+	surface.DrawTexturedRectUV(100, ScrH()-200, 69, 165*shift_health,0.01,0.01, 1, shift_health)
+	
+	surface.SetMaterial(Material("filmgrain/filmgrain"))
+	surface.SetDrawColor(0, 0, 0, (120 - LocalPlayer():Health()) )
+	surface.DrawTexturedRectUV(0, 0, ScrW(), ScrH(), 2, 2, 0, 0)
 end
 
 function DrawStamina()
-	local maxlen = ( LocalPlayer():GetNWInt("Stamina")/100) * 250
-	draw.RoundedBoxEx(4, 145, ScrH() -42, 252, 27, Color(255,255,255,255), true, true, true, true)
-	draw.RoundedBoxEx(4, 146, ScrH() -41, 250, 25, Color(50,50,50,255), true, true, true, true)
+	local hud_stamina = Material("hud_trips_dayz/hud_stamina.png","noclamp smooth")
+	local hud_stamina_icon = Material("hud_trips_dayz/hud_stamina_icon.png","noclamp smooth")
 	
-	if LocalPlayer():GetNWInt("Stamina") > 5 then
-		draw.RoundedBoxEx(4, 146, ScrH() -41, maxlen, 25, Color(1,51,81,255), true, true, true, true)
-		draw.RoundedBoxEx(4, 146, ScrH() -41, maxlen, 12, Color(9,117,181,255), true, true, false, false)
-	end
+	surface.SetMaterial( hud_stamina )
+	surface.SetDrawColor(172,172,40,255)
+	local stamina = LocalPlayer():GetNWInt("Stamina")
+	local stam_amount = 1 - (stamina/100)
+	surface.CircularProgress(4, ScrH() - 264, 256,256 , stam_amount)
 	
-	draw.DrawText("Stamina", "Cyb_HudTEXT", 150, ScrH() -41, Color(255, 255, 255, 255),TEXT_ALIGN_LEFT)
-	draw.DrawText(LocalPlayer():GetNWInt("Stamina"), "Cyb_HudTEXT", 390, ScrH() -41, Color(255, 255, 255, 255),TEXT_ALIGN_RIGHT)
-
+	surface.SetDrawColor(250,250,250,255)
+	surface.SetMaterial(hud_stamina_icon)
+	surface.DrawTexturedRectUV(4, ScrH() - 264, 256, 256,0.01,0.01, 1, 1)	
 end
 
 function drawvehiclehud()
@@ -659,16 +851,17 @@ function drawvehiclehud()
 	local fuel = 0
 	local health = 0
 
-	if !(LocalPlayer():InVehicle() and InSafeZone == false) then return end
+	--if !(LocalPlayer():InVehicle() and InSafeZone == false) then return end
 	
-	if LocalPlayer():GetVehicle():GetParent():IsValid() then
+	/*if LocalPlayer():GetVehicle():GetParent():IsValid() then
 		fuel = math.Round(LocalPlayer():GetVehicle():GetParent():GetNWInt("fuel"))
 		health = math.Round(LocalPlayer():GetVehicle():GetParent():Health())
 	else
 		fuel = math.Round(LocalPlayer():GetVehicle():GetNWInt("fuel"))
 		health = math.Round(LocalPlayer():GetVehicle():Health())
-	end
-
+	end*/
+	fuel = 20
+	health = 20
 	if health < 90 then 
 	
 		surface.SetDrawColor(255,255,255,255)
@@ -760,62 +953,77 @@ function drawvehiclehud()
 end
 
 function DrawHunger()
-	local hungermat = Material(PHDayZ.HungerMaterial)
+	local hud_hunger = Material("hud_trips_dayz/hud_hunger.png","noclamp smooth")
+	local hud_hunger_overlay = Material("hud_trips_dayz/hud_hunger_overlay.png","noclamp smooth")
+	local hud_hunger_icon = Material("hud_trips_dayz/hud_hunger_icon.png","noclamp smooth")
 	
 	if GetHungerValue() == nil then return end
 	
-	if GetHungerValue() > 50 then return end
+	surface.SetDrawColor(250,250,250,255)
+	surface.SetMaterial(hud_hunger)
+	surface.DrawTexturedRectUV(66, ScrH()-192, 59, 124,0.01,0.01, 1, 1)
+
+	surface.SetDrawColor(70,70,70,255)
+	surface.SetMaterial(hud_hunger_overlay)
+	local hunger_shift = 1 - (GetHungerValue()/100)
+	if hunger_shift > 1 then hunger_shift = 1 end
+	surface.DrawTexturedRectUV(66, ScrH()-192, 59, 124*hunger_shift,0.01,0.01, 1, hunger_shift)
 	
-	surface.SetDrawColor(255,255,255,255)
-	
+	if GetHungerValue() > 50 then
+		surface.SetDrawColor(250,250,250,255)
+	end
 	if GetHungerValue() <= 45 then
 		surface.SetDrawColor(201,237,92,255)
 	end
-
 	if GetHungerValue() <= 40 then
 		surface.SetDrawColor(235,237,92,255)
 	end
-
 	if GetHungerValue() <= 35 then
 		surface.SetDrawColor(237,205,92,255)
 	end
-
 	if GetHungerValue() <= 30 then
 		surface.SetDrawColor(237,164,92,255)
 	end
-
 	if GetHungerValue() <= 25 then
 		surface.SetDrawColor(235,90,51,255)
 	end
-
 	if GetHungerValue() <= 20 then
 		surface.SetDrawColor(255,86,40,255)
 	end
-
 	if GetHungerValue() <= 15 then
 		surface.SetDrawColor(255,70,40,255)
 	end
-
 	if GetHungerValue() <= 10 then
 		surface.SetDrawColor(255,40,40,255)
 	end
-
 	if GetHungerValue() <= 5 then
 		surface.SetDrawColor(255,0,0,255)
 	end
-	
-	surface.SetMaterial( hungermat )
-	surface.DrawTexturedRect(145, ScrH()-164, 64, 64)
-
+	surface.SetMaterial(hud_hunger_icon)
+	surface.DrawTexturedRectUV(82, ScrH()-75, 24, 24,0.01,0.01, 1, 1)
 end
 
-function DrawThirst() 
-	local thirstmat = Material(PHDayZ.ThirstMaterial)
+function DrawThirst()
+	local hud_thirst = Material("hud_trips_dayz/hud_thirst.png","noclamp smooth")
+	local hud_thirst_overlay = Material("hud_trips_dayz/hud_thirst_overlay.png","noclamp smooth")
+	local hud_thirst_icon = Material("hud_trips_dayz/hud_thirst_icon.png","noclamp smooth")
+	
 	if GetThirstValue() == nil then return end
 	
-	if GetThirstValue() > 50 then return end
-		
-	surface.SetDrawColor(255,255,255,255)
+	surface.SetDrawColor(250,250,250,255)
+	surface.SetMaterial(hud_thirst)
+	surface.DrawTexturedRectUV(145, ScrH()-192, 59, 124,0.01,0.01, 1, 1)
+	
+	surface.SetDrawColor(70,70,70,255)
+	surface.SetMaterial(hud_thirst_overlay)
+	
+	local shift_thirst = 1 - (GetThirstValue()/100)
+	if shift_thirst > 1 then shift_thirst = 1 end
+	surface.DrawTexturedRectUV(145, ScrH()-192, 59, 124*shift_thirst,0.01,0.01, 1, shift_thirst)
+	
+	if GetThirstValue() > 50 then 		
+		surface.SetDrawColor(250,250,250,255)
+	end
 		
 	if GetThirstValue() <= 45 then
 		surface.SetDrawColor(201,237,92,255)
@@ -852,7 +1060,32 @@ function DrawThirst()
 	if GetThirstValue() <= 5 then
 		surface.SetDrawColor(255,0,0,255)
 	end
+	surface.SetMaterial(hud_thirst_icon)
+	surface.DrawTexturedRectUV(156, ScrH()-72, 24, 24,0.01,0.01, 1, 1)		
+end
+
+function DrawBleeding() 
+	local hud_bleed = Material("hud_trips_dayz/hud_bleed.png","noclamp smooth")
+	if GetBleedValue() == nil then return end	
+	if GetBleedValue() == 0 then return end
+
+	if GetBleedValue() > 0 then
+		if CountUp == nil then CountUp = false end
+		if bleedPulse == nil then bleedPulse = 0 end
+		surface.SetDrawColor(255,0,0,bleedPulse)
+		if CountUp == true then
+			--print("Blood count up!: "..bleedPulse.."\n")
+			bleedPulse = bleedPulse + 10
+			if bleedPulse >= 250 then CountUp = false end
+		elseif CountUp == false then
+			--print("Blood count down!: "..bleedPulse.."\n")
+			bleedPulse = bleedPulse - 10
+			if bleedPulse <= 0 then CountUp = true end
+		end
+		
+		
+	end
 			
-	surface.SetMaterial( thirstmat )
-	surface.DrawTexturedRect(200, ScrH() -162, 64,64)
+	surface.SetMaterial(hud_bleed)
+	surface.DrawTexturedRectUV(4, ScrH() - 264, 256, 256,0.01,0.01, 1, 1)
 end

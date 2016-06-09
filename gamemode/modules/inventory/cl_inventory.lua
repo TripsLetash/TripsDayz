@@ -116,7 +116,7 @@ end
 
 function GUI_Rebuild_Inv(parent)
 
-	if GUI_Loot_Frame != nil and GUI_Loot_Frame:IsValid() then
+	if (GUI_Loot_Frame and GUI_Loot_Frame:IsValid()) then
 		GUI_Loot_Frame:Remove()
 	end
 	
@@ -202,6 +202,7 @@ function GUI_Rebuild_Inv(parent)
 	Slot2 = vgui.Create("DPanel", RightPanel)
 	Slot2:SetSize(100,100)
 	Slot2:SetPos(5,5)
+	Slot2:SetTooltip("Eat an item by dragging it onto this!")
 	Slot2.Paint = function()
 		draw.RoundedBox(8,0,0,Slot2:GetWide(),Slot2:GetTall(),Color( 255, 255, 255, 3 ))
 	end
@@ -226,6 +227,7 @@ function GUI_Rebuild_Inv(parent)
 	Slot3 = vgui.Create("DPanel", RightPanel)
 	Slot3:SetSize(100,100)
 	Slot3:SetPos(5,205)
+	Slot3:SetTooltip("Analyze an item by dragging it onto this!")
 	Slot3.Paint = function()
 		draw.RoundedBox(8,0,0,Slot3:GetWide(),Slot3:GetTall(),Color( 255, 255, 255, 3 ))
 	end
@@ -249,6 +251,7 @@ function GUI_Rebuild_Inv(parent)
 	Slot4 = vgui.Create("DPanel", RightPanel)
 	Slot4:SetSize(100,100)
 	Slot4:SetPos(5,305)
+	Slot4:SetTooltip("Decompile an item by dragging it onto this!")
 	Slot4.Paint = function()
 		draw.RoundedBox(8,0,0,Slot4:GetWide(),Slot4:GetTall(),Color( 255, 255, 255, 3 ))
 	end	
@@ -272,6 +275,7 @@ function GUI_Rebuild_Inv(parent)
 	Slot5 = vgui.Create("DPanel", RightPanel)
 	Slot5:SetSize(100,100)
 	Slot5:SetPos(5,405)
+	Slot5:SetTooltip("Empty the clip on your weapon by dragging it into this!")
 	Slot5.Paint = function()
 		draw.RoundedBox(8,0,0,Slot5:GetWide(),Slot5:GetTall(),Color( 255, 255, 255, 3 ))
 	end
@@ -295,6 +299,7 @@ function GUI_Rebuild_Inv(parent)
 	Slot6 = vgui.Create("DPanel", RightPanel)
 	Slot6:SetSize(100,100)
 	Slot6:SetPos(5,105)
+	Slot6:SetTooltip("Drop an item by dragging it onto this!")
 	Slot6.Paint = function()
 		draw.RoundedBox(8,0,0,Slot6:GetWide(),Slot6:GetTall(),Color( 255, 255, 255, 3 ))
 	end
@@ -333,6 +338,7 @@ function GUI_Rebuild_Inv(parent)
 	Slot1 = vgui.Create("DPanel", RightPanel)
 	Slot1:SetSize(100,100)
 	Slot1:SetPos(115,5)
+	Slot1:SetTooltip("Use an item by dragging it onto this!")
 	Slot1.Paint = function()
 		draw.RoundedBox(8,0,0,Slot1:GetWide(),Slot1:GetTall(),Color( 255, 255, 255, 3 ))
 	end
@@ -355,6 +361,7 @@ function GUI_Rebuild_Inv(parent)
 	CharSlot1 = vgui.Create("DPanel", CharPanel)
 	CharSlot1:SetSize(100,100)
 	CharSlot1:SetPos(145,70)
+	CharSlot1:SetTooltip("Hats")
 	CharSlot1.Paint = function()
 		draw.RoundedBox(8,0,0,CharSlot1:GetWide(),CharSlot1:GetTall(),Color( 255, 255, 255, 3 ))
 	end
@@ -380,6 +387,7 @@ function GUI_Rebuild_Inv(parent)
 	CharSlot2 = vgui.Create("DPanel", CharPanel)
 	CharSlot2:SetSize(100,100)
 	CharSlot2:SetPos(145,175)
+	CharSlot2:SetTooltip("Clothing")
 	CharSlot2.Paint = function()
 		draw.RoundedBox(8,0,0,CharSlot2:GetWide(),CharSlot2:GetTall(),Color( 255, 255, 255, 3 ))
 	end
@@ -404,6 +412,7 @@ function GUI_Rebuild_Inv(parent)
 	CharSlot3 = vgui.Create("DPanel", CharPanel) -- Primary Weapon
 	CharSlot3:SetSize(100,100)
 	CharSlot3:SetPos(250,175)
+	CharSlot3:SetTooltip("Primary Weapons")
 	CharSlot3.Paint = function()
 		draw.RoundedBox(8,0,0,CharSlot3:GetWide(),CharSlot3:GetTall(),Color( 255, 255, 255, 3 ))
 	end
@@ -429,6 +438,7 @@ function GUI_Rebuild_Inv(parent)
 	CharSlot4 = vgui.Create("DPanel", CharPanel) -- Secondary Weapon
 	CharSlot4:SetSize(100,100)
 	CharSlot4:SetPos(250,280)
+	CharSlot4:SetTooltip("Secondary Weapons")
 	CharSlot4.Paint = function()
 		draw.RoundedBox(8,0,0,CharSlot4:GetWide(),CharSlot4:GetTall(),Color( 255, 255, 255, 3 ))
 	end
@@ -454,6 +464,7 @@ function GUI_Rebuild_Inv(parent)
 	CharSlot5 = vgui.Create("DPanel", CharPanel) -- Melee Weapon
 	CharSlot5:SetSize(100,100)
 	CharSlot5:SetPos(40,175)
+	CharSlot5:SetTooltip("Melee Weapons")
 	CharSlot5.Paint = function()
 		draw.RoundedBox(8,0,0,CharSlot5:GetWide(),CharSlot5:GetTall(),Color( 255, 255, 255, 3 ))
 	end

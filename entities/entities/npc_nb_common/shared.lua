@@ -351,6 +351,11 @@ function ENT:StartAttack( enemy )
 end
 
 function ENT:OnHitEnemy( enemy )
+	if enemy:IsPlayer() then
+		if math.random(1,100) > 20 then
+			enemy:Bleeding( 1 )
+		end
+	end
 	enemy:TakeDamage( self.Damage, self )
 end
 
@@ -368,7 +373,7 @@ function ENT:OnHitBreakable( ent )
 	else		
 		if not ent.Hits then				
 			ent.Hits = 1
-			ent.MaxHits = math.random(10,20)					
+			ent.MaxHits = math.random(5,10)					
 			ent:EmitSound( self.WoodHit )				
 		else
 			ent.Hits = ent.Hits + 1					
@@ -469,7 +474,7 @@ function ENT:CanAttackEnemy( ent )
 	end
 end
 
-function ENT:GetJumpable()
+function ENT:GetJumpable()	
 	local trace = {}
 	trace.start = self:GetPos() + Vector(0,0,20)
 	trace.endpos = trace.start + self:GetForward() * 128
@@ -479,9 +484,12 @@ function ENT:GetJumpable()
 	
 	if tr.Hit then
 		if tr.Entity:IsPlayer() then return false end
+		if string.Left(tr.Entity:GetClass(),9) == "func_door" then return false end
+		if string.Left(tr.Entity:GetClass(),9) == "prop_door" then return false end 
+		if tr.Entity:GetClass() == "npc_nb_common" then return false end
 		if tr.Entity:IsVehicle() then return false end
 		if tr.Entity:IsNPC() then return false end
-		return true
+		return true		
 	end
 end
 
@@ -519,14 +527,17 @@ function ENT:OnStuck()
 	else
 		self.Obstructed = false
 	end
-	if !self.Alert then
-		self.loco:SetDesiredSpeed( self.BumpSpeed )
-		self.loco:Jump()
-		self.loco:SetDesiredSpeed( self.BumpSpeed )	
 	
+	if !self.Alert then
+		if self:GetJumpable() then self.loco:Jump() end		
 		self:StopMovingToPos()
+		--self:MoveToPos(self:GetPos() + Vector( math.Rand( -10, 10 ), math.Rand( -10, 10 ), 0 ) * 2)
+		self:PlayActivity(ACT_WALK)
 	else
-		self.loco:Jump()
+		if self:GetJumpable() then self.loco:Jump() end
+		self:StopMovingToPos()
+		--self:MoveToPos(self:GetPos() + Vector( math.Rand( -10, 10 ), math.Rand( -10, 10 ), 0 ) * 2)
+		self:PlayActivity(ACT_WALK)
 	end
 	self.loco:ClearStuck()
 
@@ -603,7 +614,7 @@ function ENT:RunBehaviour()
 			self.loco:FaceTowards(enemy:GetPos())
 			self:PlayActivity( self.MoveAnim )
 			self.loco:SetDesiredSpeed( self.MoveSpeed )
-			self.loco:SetAcceleration(120)
+			self.loco:SetAcceleration(240)
 			if !self.Alert then
 				self:StopMovingToPos()
 				self:EmitVoiceSound( "cyb_zombies/alertroar.wav" )
@@ -611,7 +622,7 @@ function ENT:RunBehaviour()
 			end
 					
 			local age = math.Clamp( math.min( enemy:GetPos():Distance( self:GetPos() ), 1000 ) / 1000, 0.2, 1 )
-			local opts = { draw = self.ShouldDrawPath, maxage = 2 * age, repath = 1, timeout = .5, tolerance = self.MeleeDistance/4 }--/2
+			local opts = { draw = self.ShouldDrawPath, maxage = 2 * age, repath = 1, timeout = .5, tolerance = self.MeleeDistance/2 }--/2
 			
 			self:MoveToPos( enemy:GetPos(), opts ) 
 			self:BreakableRoutine()
@@ -624,9 +635,9 @@ function ENT:RunBehaviour()
 				self.loco:SetDesiredSpeed( math.random(self.MoveSpeed/10, self.MoveSpeed/8) ) -- default: self.MoveSpeed/3
 				self.loco:SetAcceleration(5)
 				self:MoveToPos( self:GetPos() + Vector( math.Rand( -100, 100 ), math.Rand( -100, 100 ), 0 ) * 2 )
-			else
-				self:PlayActivity(ACT_IDLE)
-			end			
+			end
+			self:PlayActivity(ACT_IDLE)
+					
 		end		
 
         coroutine.yield()

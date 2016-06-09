@@ -28,7 +28,7 @@ hook.Add("Initialize", "InitCyBMapEnabled", function()
 end)
 
 local CyBMapMatParams = {
-	["$basetexture"] = "cyb_mat/minimap/rp_pripyat",
+	["$basetexture"] = "hud_trips_dayz/minimap/dz_necro_forest_tripstown",
 	["$nodecal"] = 1,
 	["$model"] = 1,
 	["$additive"] = 1,
@@ -36,10 +36,11 @@ local CyBMapMatParams = {
 	["$smooth"] = 1
 }
 
-local Map = {
-	Origin = Vector(-14660, 14910, 0),
-	Scale = 28.75,
-	Material = Material("cyb_mat/minimap/rp_pripyat.png", "smooth"),
+local Map = {--Overview: scale 20.00, pos_x -17756, pos_y 9477
+
+	Origin = Vector(-11042, 9140, 0),
+	Scale = 20,
+	Material = Material("hud_trips_dayz/minimap/dz_necro_forest_tripstown.png", "smooth"),
 	Size = 720,
 	Cursor = Material("cyb_mat/minimap/cursor.png", "smooth"),
 	CursorW = 190,
@@ -393,7 +394,7 @@ local function PaintMap()
 	end
 	
 	if (not LocalPlayer():Alive()) then return end
-	
+	if LocalPlayer().ConnectScreen == true then return end
 	if (ShouldDrawMap) then
 		DrawMap()
 	elseif (CyBMapEnabled == 1) then

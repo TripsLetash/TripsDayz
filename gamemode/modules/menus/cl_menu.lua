@@ -334,7 +334,9 @@ local function MMKeyPress()
 			
 			if GUI_Inv_Panel_List != nil && GUI_Inv_Panel_List:IsValid() then
 				GUI_Inv_Panel_List:Remove()
-				GUI_Main_Frame:Remove()	-- Menu exists remove it
+				if GUI_Main_Frame and GUI_Main_Frame:IsValid() then 
+					GUI_Main_Frame:Remove() -- Menu exists remove it
+				end	
 				if ItemMENU !=nil and ItemMENU:IsValid() then
 					ItemMENU:Remove()
 				end

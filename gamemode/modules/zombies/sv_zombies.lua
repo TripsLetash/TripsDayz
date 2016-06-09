@@ -2,7 +2,7 @@ local ZombieSpawns = {}
 local ZombieTypes = {}
 ZombieTbl = {}
 
-ZombieSpawns["rp_necro_forest_a1_trips"] = {
+ZombieSpawns["dz_tripstown_necro_forest"] = {
 	Vector(-493,-1289,64),
 	Vector(7049,-2539,0),
 	Vector(7275,-1077,0),
@@ -15,7 +15,7 @@ ZombieSpawns["rp_necro_forest_a1_trips"] = {
 	Vector(7926,569,0)
 }
 
-ZombieTypes["rp_necro_forest_a1_trips"] = {
+ZombieTypes["dz_tripstown_necro_forest"] = {
 	"npc_nb_common"
 	--"npc_nextbot_metrocop"
 }
